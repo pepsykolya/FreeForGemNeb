@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.0 — руководство для начинающих
+# FreeForGemNeb (ffgn) 1.0.1 — руководство для начинающих
 
 Это руководство ведёт от нуля до работающего майнера **NEB**: кошелёк, майнер на Windows, HiveOS или Linux и два способа
 майнинга (через пул или соло через собственную ноду). English version — [MANUAL.md](MANUAL.md). HiveOS подробно:
@@ -94,14 +94,14 @@ neb-wallet --wallet wallet.txt new
 
 | Пакет | Файл | Состав |
 |---|---|---|
-| Windows x64 | `ffgn-1.0.0-windows-x64.zip` | `ffgn.exe`, `nebgpu.dll`, `neb-datasets.bin`, `start.bat`, `start-suprnova.bat`, `start-solo.bat`, `start.ps1`, `install-autostart.bat`, `remove-autostart.bat`, README, MANUAL, LICENSE, NOTICE |
-| Linux x86_64 | `ffgn-1.0.0-linux-x86_64.tar.gz` | `ffgn`, `libnebgpu.so`, `neb-datasets.bin`, документы |
-| HiveOS | `ffgn-hive-1.0.0.tar.gz` | кастомный майнер `ffgn-hive`: `ffgn`, `libnebgpu.so`, `neb-datasets.bin`, `h-*.sh`, документы |
+| Windows x64 | `ffgn-1.0.1-windows-x64.zip` | `ffgn.exe`, `nebgpu.dll`, `neb-datasets.bin`, `start.bat`, `start-suprnova.bat`, `start-solo.bat`, `start.ps1`, `install-autostart.bat`, `remove-autostart.bat`, README, MANUAL, LICENSE, NOTICE |
+| Linux x86_64 | `ffgn-1.0.1-linux-x86_64.tar.gz` | `ffgn`, `libnebgpu.so`, `neb-datasets.bin`, документы |
+| HiveOS | `ffgn-hive-1.0.1.tar.gz` | кастомный майнер `ffgn-hive`: `ffgn`, `libnebgpu.so`, `neb-datasets.bin`, `h-*.sh`, документы |
 
-Страница релизов: https://github.com/pepsykolya/FreeForGemNeb/releases (тег `v1.0.0`). GPU-движок (`nebgpu.dll` /
+Страница релизов: https://github.com/pepsykolya/FreeForGemNeb/releases (тег `v1.0.1`). GPU-движок (`nebgpu.dll` /
 `libnebgpu.so`) закрытый и поставляется бинарником; остальное описано в NOTICE.
 
-**Проверьте скачанное** по `SHA256SUMS` релиза. Windows: `certutil -hashfile ffgn-1.0.0-windows-x64.zip SHA256`;
+**Проверьте скачанное** по `SHA256SUMS` релиза. Windows: `certutil -hashfile ffgn-1.0.1-windows-x64.zip SHA256`;
 Linux: `sha256sum -c SHA256SUMS`. Файл `neb-datasets.bin` в пакете — файл основной сети NEB 1.0.0 без изменений:
 
 ```
@@ -126,7 +126,7 @@ BLAKE3   fbabd0bdde0b43aef946e7031ff6e037c8a2a5d0ae2616b49b2b49b11af8010e
 
 ## 6. Windows
 
-1. Скачайте `ffgn-1.0.0-windows-x64.zip`, проверьте (раздел 4) и распакуйте в папку **без пробелов и русских букв**, например
+1. Скачайте `ffgn-1.0.1-windows-x64.zip`, проверьте (раздел 4) и распакуйте в папку **без пробелов и русских букв**, например
    `C:\FFGN`. Нужен только драйвер NVIDIA, CUDA не нужна.
 2. Выберите файл запуска:
 
@@ -176,7 +176,7 @@ Windows может спросить разрешение на первый за�
 ## 7. Linux
 
 ```bash
-mkdir -p ~/ffgn && tar -xzf ffgn-1.0.0-linux-x86_64.tar.gz -C ~/ffgn && cd ~/ffgn/ffgn-1.0.0
+mkdir -p ~/ffgn && tar -xzf ffgn-1.0.1-linux-x86_64.tar.gz -C ~/ffgn && cd ~/ffgn/ffgn-1.0.1
 export CUDA_DEVICE_ORDER=PCI_BUS_ID        # номера карт как в nvidia-smi
 ./ffgn --pool neb.ariabrain.com:3370 --wallet neb1ВАШАДРЕС --worker rig1
 ```
@@ -213,7 +213,7 @@ Config*:
 | Поле | Значение |
 |---|---|
 | Miner name | `ffgn-hive` (заполняется из URL) |
-| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.0/ffgn-hive-1.0.0.tar.gz` |
+| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-hive-1.0.1.tar.gz` |
 | Hash algorithm | `nebhash` |
 | Wallet and worker template | `%WAL%.%WORKER_NAME%` |
 | Pool URL | `neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804` (несколько = резервные; первый основной) |
@@ -222,7 +222,7 @@ Config*:
 
 Примените к ригу. Датасет внутри пакета. Майнер использует все видеокарты рига. Лог: `miner log`. Дашборд показывает скорость
 по картам (1 «хэш» = 1 попытка, то есть кХ/с = MA/s x 1000), температуру, кулеры, принятые/отклонённые шары; в колонке версии —
-эффективность (`1.0.0 0.0240 MA/W`) и `need update!!`, если вышел новый релиз.
+эффективность (`1.0.1 0.0240 MA/W`) и `need update!!`, если вышел новый релиз.
 
 - Часы рига должны идти верно: проверьте `timedatectl` (синхронизация времени включена).
 - Собственные опции майнера по частотам и андервольту главнее OC-профиля, пока майнер работает; ваши значения возвращаются
@@ -266,8 +266,8 @@ ffgn --pool neb.ariabrain.com:3370,stratum+tcp://neb.suprnova.cc:7804 --wallet n
 Вы запускаете официальную ноду NEB на том же компьютере; ffgn берёт работу с её рабочего порта `127.0.0.1:3441`, а награда за
 блок идёт на адрес, соответствующий `--miner-lock` ноды.
 
-**Возьмите ноду и кошелёк** со страницы официального релиза NEB https://github.com/SilasEigen/neb/releases/tag/v1.0.0 :
-архив для вашей системы (`neb-1.0.0-windows-x86_64.zip` или `neb-1.0.0-linux-x86_64.tar.gz`) и `SHA256SUMS`. Для ноды на
+**Возьмите ноду и кошелёк** со страницы официального релиза NEB https://github.com/SilasEigen/neb/releases/tag/v1.0.1 :
+архив для вашей системы (`neb-1.0.1-windows-x86_64.zip` или `neb-1.0.1-linux-x86_64.tar.gz`) и `SHA256SUMS`. Для ноды на
 Linux нужна glibc 2.34 или новее. **Проверьте до первого запуска:** сверьте SHA-256 архива с `SHA256SUMS`
 (PowerShell: `Get-FileHash -Algorithm SHA256 <файл>`) и проверьте подпись `SHA256SUMS` (`SHA256SUMS.asc`, ключ
 `release-key.asc`):

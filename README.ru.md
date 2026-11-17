@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.0
+# FreeForGemNeb (ffgn) 1.0.1
 
 Нативный GPU-майнер **NEB** (Neural Engine Byte) — монеты на proof-of-work, где попытка майнинга — один целочисленный шаг
 обучения небольшой нейросети (сеть KEP1 на транзитных сигналах Kepler и сеть RET2 на снимках сетчатки; они чередуются по
@@ -18,14 +18,14 @@ English version — [README.md](README.md).
 
 ## Скачать
 
-Страница релиза: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.0
+Страница релиза: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.1
 
 | пакет | файл |
 |---|---|
-| HiveOS (кастомный майнер `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.0/ffgn-hive-1.0.0.tar.gz |
-| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.0/ffgn-1.0.0-linux-x86_64.tar.gz |
-| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.0/ffgn-1.0.0-windows-x64.zip |
-| контрольные суммы | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.0/SHA256SUMS |
+| HiveOS (кастомный майнер `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-hive-1.0.1.tar.gz |
+| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-1.0.1-linux-x86_64.tar.gz |
+| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-1.0.1-windows-x64.zip |
+| контрольные суммы | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/SHA256SUMS |
 
 Бинарник майнера — `ffgn` (`ffgn.exe` на Windows). Файл датасета основной сети NEB (`neb-datasets.bin`, 222 МБ) лежит внутри
 каждого пакета.
@@ -77,7 +77,7 @@ Pearl) замедляет NEB примерно в 10 раз; ffgn на врем�
 3. Linux:
    `./ffgn --pool neb.ariabrain.com:3370 --wallet neb1ВАШАДРЕС --worker rig1`
 4. HiveOS: кастомный майнер `ffgn-hive`, Installation URL
-   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.0/ffgn-hive-1.0.0.tar.gz`, алгоритм `nebhash`, шаблон
+   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-hive-1.0.1.tar.gz`, алгоритм `nebhash`, шаблон
    кошелька `%WAL%.%WORKER_NAME%`, Pool URL `neb.ariabrain.com:3370`.
 5. Соло через свою ноду: `neb-node --run --dataset neb-datasets.bin --datadir data --miner-lock "$(neb-wallet --wallet wallet.txt lock)"`
    и `ffgn --node 127.0.0.1:3441` на том же компьютере (подробности в руководстве).

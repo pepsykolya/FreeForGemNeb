@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.0 — manual for beginners
+# FreeForGemNeb (ffgn) 1.0.1 — manual for beginners
 
 This guide takes you from zero to a running **NEB** miner: a wallet, the miner on Windows, HiveOS or Linux, and the two ways
 to mine (through a pool, or solo through your own node). Русская версия — [MANUAL.ru.md](MANUAL.ru.md). HiveOS in detail:
@@ -94,14 +94,14 @@ immature. Pools pay by their own rules (section 9).
 
 | Package | File | Contents |
 |---|---|---|
-| Windows x64 | `ffgn-1.0.0-windows-x64.zip` | `ffgn.exe`, `nebgpu.dll`, `neb-datasets.bin`, `start.bat`, `start-suprnova.bat`, `start-solo.bat`, `start.ps1`, `install-autostart.bat`, `remove-autostart.bat`, README, MANUAL, LICENSE, NOTICE |
-| Linux x86_64 | `ffgn-1.0.0-linux-x86_64.tar.gz` | `ffgn`, `libnebgpu.so`, `neb-datasets.bin`, docs |
-| HiveOS | `ffgn-hive-1.0.0.tar.gz` | the custom miner `ffgn-hive`: `ffgn`, `libnebgpu.so`, `neb-datasets.bin`, `h-*.sh`, docs |
+| Windows x64 | `ffgn-1.0.1-windows-x64.zip` | `ffgn.exe`, `nebgpu.dll`, `neb-datasets.bin`, `start.bat`, `start-suprnova.bat`, `start-solo.bat`, `start.ps1`, `install-autostart.bat`, `remove-autostart.bat`, README, MANUAL, LICENSE, NOTICE |
+| Linux x86_64 | `ffgn-1.0.1-linux-x86_64.tar.gz` | `ffgn`, `libnebgpu.so`, `neb-datasets.bin`, docs |
+| HiveOS | `ffgn-hive-1.0.1.tar.gz` | the custom miner `ffgn-hive`: `ffgn`, `libnebgpu.so`, `neb-datasets.bin`, `h-*.sh`, docs |
 
-Release page: https://github.com/pepsykolya/FreeForGemNeb/releases (tag `v1.0.0`). The GPU engine (`nebgpu.dll` /
+Release page: https://github.com/pepsykolya/FreeForGemNeb/releases (tag `v1.0.1`). The GPU engine (`nebgpu.dll` /
 `libnebgpu.so`) is closed source and ships as a binary; everything else is described in NOTICE.
 
-**Check the download** against `SHA256SUMS` of the release. Windows: `certutil -hashfile ffgn-1.0.0-windows-x64.zip SHA256`;
+**Check the download** against `SHA256SUMS` of the release. Windows: `certutil -hashfile ffgn-1.0.1-windows-x64.zip SHA256`;
 Linux: `sha256sum -c SHA256SUMS`. The dataset file `neb-datasets.bin` in the package is the file of the NEB 1.0.0 main
 network, unchanged:
 
@@ -127,7 +127,7 @@ dataset. It ends with `NEB self-test passed`.
 
 ## 6. Windows
 
-1. Download `ffgn-1.0.0-windows-x64.zip`, check it (section 4) and unpack it into a folder **without spaces and without
+1. Download `ffgn-1.0.1-windows-x64.zip`, check it (section 4) and unpack it into a folder **without spaces and without
    non-English letters**, for example `C:\FFGN`. Needs only the NVIDIA driver, no CUDA.
 2. Pick the start file:
 
@@ -178,7 +178,7 @@ software; unblock it or add the folder to the exclusions if you trust the file (
 ## 7. Linux
 
 ```bash
-mkdir -p ~/ffgn && tar -xzf ffgn-1.0.0-linux-x86_64.tar.gz -C ~/ffgn && cd ~/ffgn/ffgn-1.0.0
+mkdir -p ~/ffgn && tar -xzf ffgn-1.0.1-linux-x86_64.tar.gz -C ~/ffgn && cd ~/ffgn/ffgn-1.0.1
 export CUDA_DEVICE_ORDER=PCI_BUS_ID        # GPU numbers as in nvidia-smi
 ./ffgn --pool neb.ariabrain.com:3370 --wallet neb1YOURADDRESS --worker rig1
 ```
@@ -215,7 +215,7 @@ Config*:
 | Field | Value |
 |---|---|
 | Miner name | `ffgn-hive` (filled in from the URL) |
-| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.0/ffgn-hive-1.0.0.tar.gz` |
+| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-hive-1.0.1.tar.gz` |
 | Hash algorithm | `nebhash` |
 | Wallet and worker template | `%WAL%.%WORKER_NAME%` |
 | Pool URL | `neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804` (several = failover; the first is the primary) |
@@ -224,7 +224,7 @@ Config*:
 
 Apply it to the rig. The dataset is inside the package. The miner uses every GPU of the rig. Log: `miner log`. The dashboard
 shows speed per GPU (1 "hash" = 1 attempt, so kH/s = MA/s x 1000), temperature, fans, accepted/rejected shares, and the version
-column carries the efficiency (`1.0.0 0.0240 MA/W`) and `need update!!` when a newer release exists.
+column carries the efficiency (`1.0.1 0.0240 MA/W`) and `need update!!` when a newer release exists.
 
 - The clock of the rig must be right: check `timedatectl` (time synchronisation on).
 - The miner's own clock and undervolt options win over the OC profile while it runs; your values are put back when it
@@ -268,8 +268,8 @@ answer each share; its page and the miner's "sent" counters are the proof that s
 You run the official NEB node on the same computer; ffgn takes the work from its work port `127.0.0.1:3441`, and the block
 reward goes to the address behind the node's `--miner-lock`.
 
-**Get the node and the wallet** from the official NEB release page https://github.com/SilasEigen/neb/releases/tag/v1.0.0 :
-the archive for your system (`neb-1.0.0-windows-x86_64.zip` or `neb-1.0.0-linux-x86_64.tar.gz`) and `SHA256SUMS`. The Linux
+**Get the node and the wallet** from the official NEB release page https://github.com/SilasEigen/neb/releases/tag/v1.0.1 :
+the archive for your system (`neb-1.0.1-windows-x86_64.zip` or `neb-1.0.1-linux-x86_64.tar.gz`) and `SHA256SUMS`. The Linux
 node needs glibc 2.34 or newer. **Check before you run anything:** compare the SHA-256 of the archive with `SHA256SUMS`
 (PowerShell: `Get-FileHash -Algorithm SHA256 <file>`) and verify the signature of `SHA256SUMS` (`SHA256SUMS.asc`, key
 `release-key.asc`):
