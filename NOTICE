@@ -1,0 +1,34 @@
+FreeForGemNeb (ffgn), the NEB GPU miner of the FreeForGem family.
+Copyright (c) 2026 FreeForGem. Licensed under the terms of the LICENSE file.
+
+The host program (ffgn) and the GPU engine (nebgpu: libnebgpu.so / nebgpu.dll) are original work; the host program is
+built on the code base of the FreeForGem miner (common parts: pool failover, undervolt and clock control, idle mode,
+auto-lock, status API). The GPU engine is distributed in binary form only. Parts of them are derived from, or built
+with, the following third-party material, which remains under its own license.
+
+* NEB reference implementation (C) -- from https://github.com/SilasEigen/neb release 1.0.0, commit
+  feb0adac37af7e442f507c1853fc4b870137da06, folder pow/ref (blake3_min, chacha8, nebhash2, shares and the dataset helpers).
+  Copyright the NEB authors. Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
+  The files are unmodified. The miner compiles them in and uses them to compute again every nonce the GPU reports before it
+  is sent, and as the reference of the self-test and of the undervolt checks. Parts of the GPU engine are derived from
+  pow/gpu/nebhash2_cuda.cu of the same release (Apache-2.0). The layout of the work-service frames and the neb-pool/1
+  client follow spec/node.md and spec/pool.md of the same release.
+
+* Dataset file neb-datasets.bin (shipped in the packages) -- the dataset file of the NEB main network, unchanged from the
+  NEB 1.0.0 release (222,320,684 bytes, SHA-256 500846f682669743b1305776cfbf19edc11ad3db1c809bd5a4fe5b33cf196fa4). It is
+  derived from
+    - the Kepler DR24 transit signals of the NASA Exoplanet Archive (NASA, https://exoplanetarchive.ipac.caltech.edu), and
+    - OCTMNIST of MedMNIST v2 (Yang et al.), licensed under CC BY 4.0, https://creativecommons.org/licenses/by/4.0/ ;
+      the underlying images are from Kermany et al., "Identifying Medical Diagnoses and Treatable Diseases by Image-Based
+      Deep Learning", Cell 172(5), 2018.
+  See docs/mainnet.md and docs/testnet.md of the NEB release for how the file is made.
+
+* Rust crates from crates.io (blake3, anyhow, serde_json, base64, rand, ctrlc, socket2, sha2, rustls, ring, webpki-roots,
+  cc and their dependencies) -- each under its own license, typically MIT and/or
+  Apache-2.0 (ring: ISC-style; webpki-roots carries the Mozilla CA certificate list, MPL-2.0 data). rustls provides the TLS
+  of stratum+ssl:// pool connections.
+
+* NVIDIA CUDA runtime (cudart) -- linked statically into libnebgpu.so / nebgpu.dll and redistributed under the NVIDIA CUDA
+  Toolkit End User License Agreement. The CUDA driver (libcuda / nvcuda) is not distributed; it comes with the NVIDIA driver.
+
+The NEB node and the wallet (neb-node, neb-wallet) are not part of these packages; they come from the official NEB release.
