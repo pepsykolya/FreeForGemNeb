@@ -457,9 +457,19 @@ instead of lowering the voltage. At the start offset above the lock = the lock w
 OC profile is applied): the miner sets it again, also while mining (`set again` in the log). If it still does not hold:
 `WARNING GPUn: the core clock lock N MHz does not hold (runs at M MHz): auto-uv is off for this GPU; use the power limit of the
 OC profile`: the offset goes back to +0, the API (`core_lock_holds`, `warnings`) and the HiveOS version field show it. A step is
-taken only if the power did not rise; the climb stops when 3 steps together save less than 3 %; the result is saved only if it
-saves at least 3 % of the power, at the lowest offset that gives ~all of the saving (fewer Xid risks for a few watts). A profile
-of an earlier version that did not save power that way is tuned again.
+taken only if the power did not rise. **1.0.4 (replaces the 3 % rules of 1.0.3):** a step is taken when its power is lower than
+the step it climbs from by more than the noise of a measurement (0.5 W: repeated 15 s checks of an RTX 3070 at one offset
+differ by ~0.4 W); every step is compared with the best (lowest) power of the climb; a step that does not beat it is not taken,
+but the climb goes on: single readings between offsets move by 1-2 W (an RTX 3070 @1650 swept 0..+270 fell from 152 to 129 W,
+~1-1.5 W per 15 MHz, yet +60 once read 2 W above +30); 3 steps in a row that do not lower the power, or a rise by more than
+3 W, end the climb; a step that did not lower it while the card
+warmed by 2 C or more is measured once more. The result is the highest stable offset that
+still lowered the power, without any percentage threshold (1 W per step is a real saving). A profile saved by an earlier
+version is not tuned from +0: its offset is checked (30 s) and the climb goes on upward from it (never above a failed offset
+of the profile, nor into an offset that crashed while mining). Unchanged: the clock against the lock, the bit-exact check,
+a crash -> 2 steps below it, `--uv-max`. A step whose clock runs above the lock (1.0.4): the lock is set again and the step
+checked once more, only then refused. A lock that does not hold turns off `--auto-lock` for that GPU too (saved in
+`autolock.json`; `--auto-lock-reset` tries again).
 
 **1.0.3: CPU.** The engine waits for the GPU asleep (it used to spin a whole CPU core per GPU): a 12-GPU rig on a 2-core CPU is
 no longer at 100 % CPU.
@@ -516,6 +526,10 @@ the cache), at 810 MHz — RET2 1.18 MA/s (−93 %). ffgn therefore:
 - replaces a HiveOS OC profile memory lock below the card's maximum with the maximum while it mines, and puts the profile's
   value back on exit (`--keep-hive-mem` keeps the profile's value; `--lock-mclock N` sets your own);
 - writes a WARNING in the log after the first minute when a card's memory runs below 60 % of its maximum.
+- 1.0.4: when the driver does not let ffgn lift the profile's lock (RTX 2060 SUPER, driver 620: "memory clock lock not
+  supported") and the memory runs at that lock under load, every stats line, the API (`warnings`) and the HiveOS version field
+  say `NEB runs ~6x slower: memory locked to 810 MHz by the OC profile — remove the memory lock`: remove the memory lock (and
+  the memory clock) from the OC profile.
 
 ## 14. Laptops, and mining only while you are away
 
@@ -554,7 +568,10 @@ Every 60 seconds one line (pool mode):
 [  60s] GPU0 11.9 (139 W, 0.0856 MA/W)  GPU1 ... | total 23.8 MA/s, 278 W, 0.0856 MA/W | found 3 (bad 0) | user sub 3 acc 3 rej 0 (stale 0) | ...
 ```
 
-Solo: `... | shares 3 | blocks sub 0 acc 0 rej 0 | ...`. **MA/s** = million attempts per second; `found` = what the GPUs found (each
+1.0.4: after `total` come the average of the last 5 minutes (`| avg 5 min 23.9 MA/s (11.9, 12.0)`, total and per GPU; HiveOS shows
+this average) and the dataset of the current block (`| slot 1 TESS`: on the main network slot 0 is Kepler, slot 1 TESS; the
+rate differs by slot, an RTX 3070 @1650 ~16.9 vs ~18.6 MA/s, so a slot change is not a regression). API `/summary`:
+`attempts_per_s_avg`, `slot`, `dataset`; `/gpus`: `attempts_per_s_avg`, `memory_locked_by_oc_mhz`. Solo: `... | shares 3 | blocks sub 0 acc 0 rej 0 | ...`. **MA/s** = million attempts per second; `found` = what the GPUs found (each
 one re-checked on the CPU), `bad` must stay 0. Lines you will meet:
 
 | Line | Meaning |

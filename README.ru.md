@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.3
+# FreeForGemNeb (ffgn) 1.0.4
 
 Нативный GPU-майнер **NEB** (Neural Engine Byte) — монеты на proof-of-work, где попытка майнинга — один целочисленный шаг
 обучения небольшой нейросети (на основной сети — сеть KEP1 на транзитных сигналах Kepler в обоих слотах датасета). Видеокарты NVIDIA; пакеты для HiveOS, Windows и Linux. Комиссия разработчика **1 %**.
@@ -13,6 +13,8 @@ English version — [README.md](README.md).
 - Резервные пулы с возвратом на основной, сторожа на случай, когда пул не засчитывает шары, API с метриками Prometheus, ваши
   настройки видеокарты возвращаются после любой остановки, автозапуск Windows, статистика HiveOS, уведомление о новой версии.
 
+**Что нового в 1.0.4** (рекомендуется всем). `--auto-uv` поднимает смещение, пока каждый шаг снижает мощность: шаг принимается, если мощность ниже предыдущего шага больше шума замера (0,5 Вт), шаг, который не снизил лучшую мощность, не принимается, но подъём продолжается (отдельные замеры гуляют на 1–2 Вт), подъём останавливается, когда 3 шага подряд мощность не снижают или она выросла больше чем на 3 Вт, итог — самое высокое стабильное смещение, которое ещё снижало мощность; процентных порогов больше нет (1.0.3 остановил RTX 2060 SUPER на +165, хотя +195 и +225 давали −0,6 и −0,9 Вт). Профили, сохранённые 1.0.3, не подбираются с +0: карта проверяет сохранённое смещение и продолжает подъём от него. Строка статистики, API и HiveOS показывают датасет текущего блока (`slot 0 Kepler` / `slot 1 TESS`: скорость зависит от слота) и среднюю скорость за 5 минут. Если лок ядра не держится, для этой карты выключается и auto-lock (не только auto-uv); шаг, на котором частота выше лока, сначала получает лок заново и проверяется ещё раз, и только потом отвергается. Шлюз и майнер не рвут связь с нодой, которая молчит, но жива (до старта сети). Лок памяти из OC-профиля, который драйвер не даёт снять (RTX 2060 SUPER, драйвер 620), — громкое предупреждение в каждой строке статистики, в API и в HiveOS.
+
 **Что нового в 1.0.3** (для основной сети NEB 1.0.1). **Suprnova: исправлен учёт шар после слота комиссии разработчика (комиссия теперь всегда идёт отдельным соединением). Пользователям Suprnova обновиться обязательно.** Намного меньше нагрузка CPU: ядро ждёт GPU во сне (раньше — целое ядро CPU на каждую карту; риг на 12 GPU с 2-ядерным CPU был загружен на 100 %). `--auto-uv`: каждая проверка читает реальную частоту ядра: шаг с частотой выше лока отвергается (GeForce Turing), лок, сброшенный применением OC, ставится снова, лок, который не держится, — громкое предупреждение и auto-uv для этой карты выключен; шаг принимается, только если мощность не выросла, итог сохраняется, только если экономит не меньше 3 %, и на самом низком смещении, которое это даёт; после падения карта встаёт на 2 шага ниже сбоя, а не с +0. `--password` уходит только первому пулу или шлюзу ffgn (запасные пулы получают `x`). `--pool-check` сверяет сеть джоба.
 
 **Что нового в 1.0.2.** ffgn 1.0.2 нужен для основной сети NEB 1.0.1; ffgn 1.0.1 на ней не работает. NEB 1.0.1 заменил
@@ -25,14 +27,14 @@ NEB 1.0.0 до старта: новый genesis id, новый файл дата
 
 ## Скачать
 
-Страница релиза: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.3
+Страница релиза: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.4
 
 | пакет | файл |
 |---|---|
-| HiveOS (кастомный майнер `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-hive-1.0.3.tar.gz |
-| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-1.0.3-linux-x86_64.tar.gz |
-| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-1.0.3-windows-x64.zip |
-| контрольные суммы | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/SHA256SUMS |
+| HiveOS (кастомный майнер `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.4/ffgn-hive-1.0.4.tar.gz |
+| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.4/ffgn-1.0.4-linux-x86_64.tar.gz |
+| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.4/ffgn-1.0.4-windows-x64.zip |
+| контрольные суммы | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.4/SHA256SUMS |
 
 Бинарник майнера — `ffgn` (`ffgn.exe` на Windows). Файл датасета основной сети NEB (`neb-datasets.bin`, около 16 МБ) лежит внутри
 каждого пакета.
@@ -84,7 +86,7 @@ Pearl) замедляет NEB примерно в 10 раз; ffgn на врем�
 3. Linux:
    `./ffgn --pool neb.ariabrain.com:3370 --wallet neb1ВАШАДРЕС --worker rig1`
 4. HiveOS: кастомный майнер `ffgn-hive`, Installation URL
-   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-hive-1.0.3.tar.gz`, алгоритм `nebhash`, шаблон
+   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.4/ffgn-hive-1.0.4.tar.gz`, алгоритм `nebhash`, шаблон
    кошелька `%WAL%.%WORKER_NAME%`, Pool URL `neb.ariabrain.com:3370`.
 5. Соло через свою ноду: `neb-node --run --dataset neb-datasets.bin --datadir data --miner-lock "$(neb-wallet --wallet wallet.txt lock)"`
    и `ffgn --node 127.0.0.1:3441` на том же компьютере (подробности в руководстве).

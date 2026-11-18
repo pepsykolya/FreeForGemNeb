@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.3
+# FreeForGemNeb (ffgn) 1.0.4
 
 Native GPU miner for **NEB** (Neural Engine Byte), a proof-of-work coin whose mining attempt is one integer training step of a
 small neural network (on the main network, the Kepler transit-signal network KEP1 in both dataset slots).
@@ -11,6 +11,8 @@ NVIDIA GPUs; HiveOS, Windows and Linux packages. Dev fee **1%**. Русская 
   GPU by measurement, clock locks, temperature limit for laptops, idle mode on Windows.
 - Pool failover with the return to the primary pool, watchdogs for pools without credited shares, API with Prometheus
   metrics, your GPU settings put back after every kind of stop, Windows autostart, HiveOS stats, a notice when a new version is out.
+
+**What changed in 1.0.4** (recommended for everyone). `--auto-uv` climbs as long as every step lowers the power: a step is taken when its power is lower than the step before by more than the noise of a measurement (0.5 W), a step that does not beat the best power is not taken but the climb goes on (single readings move by 1-2 W), the climb stops when 3 steps in a row do not lower the power or it rises by more than 3 W, and the result is the highest stable offset that still lowered the power; no percentage thresholds any more (1.0.3 stopped an RTX 2060 SUPER at +165 although +195 and +225 saved 0.6 and 0.9 W each). Profiles saved by 1.0.3 are not tuned from +0: the card checks its saved offset and climbs on from it. The stats line, the API and HiveOS show the dataset of the current block (`slot 0 Kepler` / `slot 1 TESS`: the rate differs by slot) and a 5-minute average rate. A core lock that does not hold turns off auto-lock for that GPU too (not only auto-uv); a step whose clock runs above the lock gets the lock set again and is checked once more before it is refused. A gate or miner keeps its link to a node that is silent but alive (before the network starts). A memory lock of the OC profile that the driver does not let ffgn lift (RTX 2060 SUPER, driver 620) is a loud warning on every stats line, in the API and in HiveOS.
 
 **What changed in 1.0.3** (for the NEB 1.0.1 main network). **Suprnova: fixed share accounting after the dev-fee slot (the dev fee now always uses a separate connection). Suprnova users must update.** Much less CPU: the engine waits for the GPU asleep (before, a whole CPU core per GPU; a 12-GPU rig on a 2-core CPU was at 100 %). `--auto-uv`: every check reads the real core clock: a step that runs above the core lock is refused (GeForce Turing), a lock dropped by an OC apply is set again, a lock that does not hold is reported loudly and auto-uv is off for that GPU; a step is taken only if the power did not rise, the result is saved only if it saves at least 3 %, at the lowest offset that gives it; after a crash the card resumes 2 steps below it, not from +0. `--password` goes only to the first pool or to an ffgn gate (backup pools get `x`). `--pool-check` checks the network of the job.
 
@@ -25,14 +27,14 @@ about any income.
 
 ## Download
 
-Release page: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.3
+Release page: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.4
 
 | package | file |
 |---|---|
-| HiveOS (custom miner `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-hive-1.0.3.tar.gz |
-| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-1.0.3-linux-x86_64.tar.gz |
-| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-1.0.3-windows-x64.zip |
-| checksums | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/SHA256SUMS |
+| HiveOS (custom miner `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.4/ffgn-hive-1.0.4.tar.gz |
+| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.4/ffgn-1.0.4-linux-x86_64.tar.gz |
+| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.4/ffgn-1.0.4-windows-x64.zip |
+| checksums | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.4/SHA256SUMS |
 
 The miner binary is `ffgn` (`ffgn.exe` on Windows). The dataset file of the NEB main network (`neb-datasets.bin`, about 16 MB) is
 inside every package.
@@ -84,7 +86,7 @@ Full step-by-step guide for beginners (wallet, Windows, HiveOS, Linux, pools, so
 3. Linux:
    `./ffgn --pool neb.ariabrain.com:3370 --wallet neb1YOURADDRESS --worker rig1`
 4. HiveOS: custom miner `ffgn-hive`, Installation URL
-   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-hive-1.0.3.tar.gz`, algorithm `nebhash`, wallet
+   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.4/ffgn-hive-1.0.4.tar.gz`, algorithm `nebhash`, wallet
    template `%WAL%.%WORKER_NAME%`, Pool URL `neb.ariabrain.com:3370`.
 5. Solo through your own node: `neb-node --run --dataset neb-datasets.bin --datadir data --miner-lock "$(neb-wallet --wallet wallet.txt lock)"`
    and `ffgn --node 127.0.0.1:3441` on the same computer (details in the manual).
