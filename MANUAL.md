@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.2 — manual for beginners
+# FreeForGemNeb (ffgn) 1.0.5 — manual for beginners
 
 This guide takes you from zero to a running **NEB** miner: a wallet, the miner on Windows, HiveOS or Linux, and the two ways
 to mine (through a pool, or solo through your own node). Русская версия — [MANUAL.ru.md](MANUAL.ru.md). HiveOS in detail:
@@ -401,6 +401,10 @@ otherwise it is reset.
 | `--uv-coarse N` | climbing step (default 30), refined with `--uv-step` inside the failing interval |
 | `--uv-keep-last` | after a failed step keep the last good step (default: one step lower) |
 | `--uv-reval-hours H` | re-check the undervolt every H hours while mining (default 6, 0 = never) |
+| `--uv-parallel N` | 1.0.5: GPUs tuned (or re-checked from a saved profile) at the same time, the others mine meanwhile; default auto: 1 on rigs of 6+ GPUs, else 2, then 1 -> 2 -> 4 after 2 GPUs tuned without trouble (never above the free CPU threads nor the RAM of the checks); trouble -> 1, remembered for the rig |
+| `--uv-unpause` | 1.0.5: forget the guards of auto-uv (a rig paused after restarts during a tuning, GPUs off for 24 h, the remembered caution); also `--uv-reset-all` |
+| `--ramp-ms N` | 1.0.5: after a pause the GPUs go back to full load one by one, N ms apart (default 500 on rigs of 4+ GPUs, else 0); such rigs also build a new block's model 30 ms apart per GPU |
+| `--kep1-kernel auto\|dp4a\|warp` | 1.0.5: the KEP1 attempt kernel (default auto: both timed on the first model of each dataset slot, the faster kept; `warp` needs RTX 30 / A-series or newer) |
 | `--uv-dir DIR` | where the profiles are kept (default next to the binary; `/hive-config/ffgn` on HiveOS) |
 | `--uv-reset`, `--uv-reset-all` | forget the profile of the current clocks / every saved result |
 | `--auto-uv-dry-run` | only log what `--auto-uv` would change |
@@ -471,6 +475,46 @@ a crash -> 2 steps below it, `--uv-max`. A step whose clock runs above the lock 
 checked once more, only then refused. A lock that does not hold turns off `--auto-lock` for that GPU too (saved in
 `autolock.json`; `--auto-lock-reset` tries again).
 
+**1.0.5: rigs with a weak CPU, measurement.** A check process is a whole NEB engine at full load (its own CUDA context, the
+dataset tables, the CPU reference). On a rig with many GPUs and a small CPU (12x RTX 2060 SUPER on a 2-thread Pentium with
+7.6 GB of RAM) twelve of them at once hung the whole rig in 1.0.4, and the power supply and the risers are invisible to
+software. Since 1.0.5 the tuning starts small and grows only while the rig stays healthy: 1 GPU at a time on rigs of 6+ GPUs
+(else 2), 2 and then 4 after every 2 GPUs tuned without trouble, never more than the free CPU threads nor the RAM of the checks
+(1.2 GB each). Trouble during a tuning (a GPU lost from the bus, a check that hangs, all GPUs stalled at once, a mining GPU that
+computes wrong) brings it back to 1 at once and is remembered for the rig (`uv-parallel.json`: later starts stay at 1 until
+`--uv-unpause` / `--uv-reset-all`). `--uv-parallel N` sets a fixed number. The log says how many and why
+(`auto-uv: parallel tuning 1 -> 2: 2 GPUs tuned without trouble ...`). The GPUs that wait mine at their current offset, and a
+GPU's own mining pauses while it is checked. Every step that lowered the power is saved at once (as "tuning in progress"):
+after a restart the climb goes on from it instead of from the start (a failure in the middle of a check still counts: 2 steps
+below it).
+
+**1.0.5: no endless tuning, no reboot loops.** Each GPU is tuned once; a saved result (also one in progress) is used; it is
+tuned again only after a failure on that GPU (2 steps below the failure, no climb above it) or as the short re-check every
+`--uv-reval-hours`. Guards (`uv-guard.json`):
+- a GPU that starts with a failure at its tuned offset 3 times in a row gets no auto-uv for 24 h and mines at its own offset
+  (`WARNING auto-uv: GPU3 ... auto-uv OFF for this GPU for 24 h`, `[AUTO-UV GPU3 OFF 24h]` in the stats line and in HiveOS,
+  `warnings` in the API);
+- the miner writes a mark before a GPU's tuning and removes it when the GPU mines; a start that finds it (the miner or the rig
+  stopped in the middle: a restart, a reboot, ffgn's own restart) first mines 7 minutes and tunes on only if the rig stayed
+  calm; 2 such starts within an hour pause auto-uv on the rig (`[AUTO-UV PAUSED]`) until `--uv-unpause` / `--uv-reset-all` or
+  a new miner version: it mines with the saved results of this version, else at the cards' own offsets;
+- a run spends at most 10 minutes per GPU and 60 minutes in all on tuning; a GPU over its time mines at its last taken step and
+  goes on climbing at the next start. The check processes start at least 3 s apart and wait (up to 90 s) for 700 MB of free RAM. The power of
+a step is now the mean of the NVML samples after 10 s under load (steps of 25 s instead of 15 s; a short check of an RTX 2060
+SUPER read 76.7 W and then 67.4 W at the same offset), the log gives its spread (`sd 0.4 W, 30 samples`), and a step that did
+not clearly lower the power is measured once more in the order best-step-best-step (a warming card drifts both alike) before
+it counts.
+
+**1.0.5: power steps of a rig.** Rigs of 4+ GPUs: after a pause (pool or node lost, no job, idle mode, an auto-uv check) the
+GPUs go back to full load one by one, 500 ms apart (`--ramp-ms`), and a new block's model is built 30 ms apart per GPU; the
+start was already staggered (1.5 s per GPU). When all GPUs stop making attempts in the same few seconds while there is work,
+the log says so once: `ERROR: all 12 GPUs stalled at once at 03:12:45 UTC (...): likely a PCIe bus / power event (risers, PSU,
+cables), not the pool` (look for Xid 79 "GPU has fallen off the bus" in `dmesg`). On every new block's model the log says how long
+each GPU stood idle and how far apart the GPUs went back to full load (`model change: GPU idle GPU0 41 ms, GPU1 44 ms; back at
+work within 31 ms of each other`, API: `model_change_idle_ms`); the CPU check of a new model runs beside the mining (the GPU no
+longer waits for it). The clock lock keeper only reads the clocks (every 5 s) and sets a lock again only when the card is seen
+running off it.
+
 **1.0.3: CPU.** The engine waits for the GPU asleep (it used to spin a whole CPU core per GPU): a 12-GPU rig on a 2-core CPU is
 no longer at 100 % CPU.
 
@@ -487,6 +531,25 @@ Simple recipes (Windows: `AUTO_UV`, `AUTO_LOCK` in the `.bat`, run as administra
 
 On the main network every block is KEP1, so the speed is steady; the figures below are KEP1. A measurement over a few minutes
 can still be noisy; the miner's efficiency number is an average.
+
+Million attempts per second (MA/s) and million attempts per second per watt (MA/W), the real dataset, memory at its stock
+clock, no undervolt. On the main network every block is KEP1 (slot 0 Kepler, slot 1 TESS: two datasets of different size).
+
+**GPU engine 0.2.9 (ffgn 1.0.5): both KEP1 kernels**, engine benchmark, the same conditions for both, measured 19.11.2026:
+
+| GPU | slot | dp4a kernel, MA/s | warp kernel, MA/s | W | dp4a, MA/W | warp, MA/W | auto picks |
+|---|---|---|---|---|---|---|---|
+| RTX 4070 Laptop GPU (cool, at its ~115 W cap) | Kepler | 20.8 | 33.4 | ~115 | 0.18 | 0.29 | warp |
+| RTX 4070 Laptop GPU (cool, at its ~115 W cap) | TESS | 20.7 | 33.5 | ~115 | 0.18 | 0.29 | warp |
+| RTX 4070 Laptop GPU (hot, 88 C, ~64 W) | Kepler | 14.97 | 23.61 | 64 | 0.232 | 0.368 | warp |
+| RTX 3070 (power limit 200 W, stock clocks) | Kepler | 16.73 | 16.56 | 200 | 0.084 | 0.083 | dp4a |
+| RTX 3070 (power limit 200 W, stock clocks) | TESS | 17.75 | 20.25 | 200 | 0.089 | 0.101 | warp (initial model); dp4a on the chain's models |
+
+On the RTX 3070 the rate is set by the memory (its 4 MB cache cannot hold the tables): the warp kernel gains on the smaller
+TESS slot with the initial model only; on the trained models of the chain (19.11.2026, mining on Suprnova) its own timing gave
+Kepler dp4a 17.34 vs warp 16.87 and TESS dp4a 20.65 vs warp 19.76, so it mines with the old kernel (16.8 / 18.4 MA/s at 200 W,
+as 1.0.4). RTX 4070 Laptop GPU on the same pool: warp 30.7 vs dp4a 18.9 MA/s on Kepler and 23.5 vs 18.6 on TESS, all shares
+accepted. RTX 40 desktop and RTX 50 cards were not measured by us with 0.2.9 yet.
 
 **RTX 3070, GPU engine 0.2.8** (core lock, power limit 200 W, memory at its stock 7001 MHz, no undervolt, the real dataset;
 speed in million attempts per second, efficiency in million attempts per second per watt):
