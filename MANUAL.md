@@ -358,7 +358,7 @@ GPU in `--devices` order (`-` = leave that GPU alone).
 | `--pool HOST:PORT` | pool; `stratum+tcp://` plain, `stratum+ssl://` TLS; several (`A,B` or `--pool A --pool B`) = failover, the first is primary |
 | `--wallet neb1...` | the address the pool pays (required with `--pool`) |
 | `--worker NAME` | worker name (login `ADDRESS.NAME`; default none) |
-| `--password TEXT` | pool password (default `x`); for a gate: the gate token |
+| `--password TEXT` | pool password (default `x`); for a gate: the gate token. 1.0.3: sent only to the first pool of `--pool` or to an ffgn gate; backup pools get `x` |
 | `--node HOST:PORT[,..]` | solo: work service of a NEB node (default port 3441; local only) |
 | `--dataset FILE` | `neb-datasets.bin` (default: next to the binary, in the working folder, or the HiveOS folder). A job is mined only with the dataset file of its own network; for the old test network pass the testnet file of NEB 0.3.1 here |
 | `--gate`, `--gate-listen ADDR`, `--gate-token-file FILE`, `--gate-slots-bits B` | run the gate (section 11) |
@@ -450,6 +450,19 @@ others keep mining; a GPU that crashes while mining is named in the log, remembe
 offset, and a card with nothing left to lower is left out for an hour. After a crash or a failed check (1.0.3) the card does
 not tune again from +0: it resumes 2 steps (30 MHz) below the failed offset, never above the last confirmed one, after a
 30 s check, and mines; if that fails too, 2 steps lower again, down to the base.
+
+**1.0.3: the lock and the watts are checked.** Every check also reads the real core clock under load. A step whose clock runs
+above the core lock (+45 MHz, 3 clock bins) is refused: on GeForce Turing (RTX 20xx) an offset with a lock can raise the clock
+instead of lowering the voltage. At the start offset above the lock = the lock was dropped (HiveOS `nvidia-oc` resets it when an
+OC profile is applied): the miner sets it again, also while mining (`set again` in the log). If it still does not hold:
+`WARNING GPUn: the core clock lock N MHz does not hold (runs at M MHz): auto-uv is off for this GPU; use the power limit of the
+OC profile`: the offset goes back to +0, the API (`core_lock_holds`, `warnings`) and the HiveOS version field show it. A step is
+taken only if the power did not rise; the climb stops when 3 steps together save less than 3 %; the result is saved only if it
+saves at least 3 % of the power, at the lowest offset that gives ~all of the saving (fewer Xid risks for a few watts). A profile
+of an earlier version that did not save power that way is tuned again.
+
+**1.0.3: CPU.** The engine waits for the GPU asleep (it used to spin a whole CPU core per GPU): a 12-GPU rig on a 2-core CPU is
+no longer at 100 % CPU.
 
 Simple recipes (Windows: `AUTO_UV`, `AUTO_LOCK` in the `.bat`, run as administrator):
 

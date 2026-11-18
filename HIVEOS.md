@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.2 on HiveOS
+# FreeForGemNeb (ffgn) 1.0.3 on HiveOS
 
 [English](#english) · [Русский](#русский)
 
@@ -32,7 +32,7 @@ the NEB **main** network. Pools are described in MANUAL section 9, the node and 
 2. **Flight Sheets**, **Import from Clipboard**, paste:
 
 ```json
-{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-hive-1.0.2.tar.gz","user_config":""},"pool_geo":[]}]}
+{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-hive-1.0.3.tar.gz","user_config":""},"pool_geo":[]}]}
 ```
 
 3. Pick your `NEB` wallet in the red-marked field (the import carries no wallet), **Create flight sheet**, apply it to the rig.
@@ -46,7 +46,7 @@ Coin `NEB`, Wallet: yours, Pool: *Configure in miner*, Miner: **Custom**, *Setup
 | Field | Value |
 |---|---|
 | Miner name | `ffgn-hive` (filled in automatically from the URL) |
-| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-hive-1.0.2.tar.gz` |
+| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-hive-1.0.3.tar.gz` |
 | Hash algorithm | `nebhash` |
 | Wallet and worker template | `%WAL%.%WORKER_NAME%` |
 | Pool URL | see the table above |
@@ -59,7 +59,7 @@ becomes `--password` (unless it is `x`); `--api 127.0.0.1:4078` is added; Extra 
 
 The miner uses every GPU of the rig by itself (`--devices` narrows the choice). Log: `miner log`, or
 `/var/log/miner/ffgn-hive/ffgn-hive.log`. The dashboard shows speed per GPU (1 "hash" = 1 attempt; kH/s = MA/s x 1000),
-temperature, fans and accepted / rejected shares; the version column carries the efficiency (`1.0.2 0.0240 MA/W`), and
+temperature, fans and accepted / rejected shares; the version column carries the efficiency (`1.0.3 0.0240 MA/W`), and
 `need update!!` when a newer release is out. ffgn 1.0.2 is required for the NEB 1.0.1 main network (1.0.1 does not work on it); on the main network every block is KEP1,
 so the speed is steady (MANUAL section 18).
 
@@ -124,7 +124,7 @@ TLS: `stratum+ssl://HOST:PORT`, где пул его предлагает. Пр�
 2. **Flight Sheets**, **Import from Clipboard**, вставьте:
 
 ```json
-{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-hive-1.0.2.tar.gz","user_config":""},"pool_geo":[]}]}
+{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-hive-1.0.3.tar.gz","user_config":""},"pool_geo":[]}]}
 ```
 
 3. Выберите кошелёк `NEB` в поле, отмеченном красным (импорт кошелёк не переносит), **Create flight sheet**, примените к ригу.
@@ -138,7 +138,7 @@ Coin `NEB`, Wallet: ваш, Pool: *Configure in miner*, Miner: **Custom**, *Setu
 | Поле | Значение |
 |---|---|
 | Miner name | `ffgn-hive` (заполняется автоматически из URL) |
-| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-hive-1.0.2.tar.gz` |
+| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-hive-1.0.3.tar.gz` |
 | Hash algorithm | `nebhash` |
 | Wallet and worker template | `%WAL%.%WORKER_NAME%` |
 | Pool URL | см. таблицу выше |
@@ -151,7 +151,7 @@ Coin `NEB`, Wallet: ваш, Pool: *Configure in miner*, Miner: **Custom**, *Setu
 
 Майнер сам использует все видеокарты рига (`--devices` сужает выбор). Лог: `miner log` или
 `/var/log/miner/ffgn-hive/ffgn-hive.log`. Дашборд показывает скорость по картам (1 «хэш» = 1 попытка; кХ/с = MA/s x 1000),
-температуру, кулеры и принятые / отклонённые шары; в колонке версии — эффективность (`1.0.2 0.0240 MA/W`) и `need update!!`,
+температуру, кулеры и принятые / отклонённые шары; в колонке версии — эффективность (`1.0.3 0.0240 MA/W`) и `need update!!`,
 если вышел новый релиз. ffgn 1.0.2 нужен для основной сети NEB 1.0.1 (1.0.1 на ней не работает); в основной сети каждый блок — KEP1, поэтому скорость ровная (MANUAL.ru.md, раздел 18).
 
 **OC-профиль.** С `--lock-cclock`, `--lock-mclock`, `--moffset`, `--auto-uv`, `--auto-lock` майнер сам выставляет частоты и

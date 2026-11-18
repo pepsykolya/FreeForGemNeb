@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.2
+# FreeForGemNeb (ffgn) 1.0.3
 
 Native GPU miner for **NEB** (Neural Engine Byte), a proof-of-work coin whose mining attempt is one integer training step of a
 small neural network (on the main network, the Kepler transit-signal network KEP1 in both dataset slots).
@@ -12,6 +12,8 @@ NVIDIA GPUs; HiveOS, Windows and Linux packages. Dev fee **1%**. Русская 
 - Pool failover with the return to the primary pool, watchdogs for pools without credited shares, API with Prometheus
   metrics, your GPU settings put back after every kind of stop, Windows autostart, HiveOS stats, a notice when a new version is out.
 
+**What changed in 1.0.3** (for the NEB 1.0.1 main network; 1.0.2 works, 1.0.3 is recommended). Much less CPU: the engine waits for the GPU asleep (before, a whole CPU core per GPU; a 12-GPU rig on a 2-core CPU was at 100 %). `--auto-uv`: every check reads the real core clock: a step that runs above the core lock is refused (GeForce Turing), a lock dropped by an OC apply is set again, a lock that does not hold is reported loudly and auto-uv is off for that GPU; a step is taken only if the power did not rise, the result is saved only if it saves at least 3 %, at the lowest offset that gives it; after a crash the card resumes 2 steps below it, not from +0. `--password` goes only to the first pool or to an ffgn gate (backup pools get `x`). `--pool-check` checks the network of the job.
+
 **What changed in 1.0.2.** ffgn 1.0.2 is required for the NEB 1.0.1 main network; ffgn 1.0.1 does not work on it. NEB 1.0.1
 replaced NEB 1.0.0 before the start: new genesis id, a new dataset file `neb-datasets.bin` (about 16 MB instead of 222 MB; it is
 inside every package) and both slots of the main network run KEP1, so every block has the KEP1 speed (RET2 is gone from the
@@ -23,14 +25,14 @@ about any income.
 
 ## Download
 
-Release page: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.2
+Release page: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.3
 
 | package | file |
 |---|---|
-| HiveOS (custom miner `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-hive-1.0.2.tar.gz |
-| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-1.0.2-linux-x86_64.tar.gz |
-| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-1.0.2-windows-x64.zip |
-| checksums | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/SHA256SUMS |
+| HiveOS (custom miner `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-hive-1.0.3.tar.gz |
+| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-1.0.3-linux-x86_64.tar.gz |
+| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-1.0.3-windows-x64.zip |
+| checksums | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/SHA256SUMS |
 
 The miner binary is `ffgn` (`ffgn.exe` on Windows). The dataset file of the NEB main network (`neb-datasets.bin`, about 16 MB) is
 inside every package.
@@ -82,7 +84,7 @@ Full step-by-step guide for beginners (wallet, Windows, HiveOS, Linux, pools, so
 3. Linux:
    `./ffgn --pool neb.ariabrain.com:3370 --wallet neb1YOURADDRESS --worker rig1`
 4. HiveOS: custom miner `ffgn-hive`, Installation URL
-   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-hive-1.0.2.tar.gz`, algorithm `nebhash`, wallet
+   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.3/ffgn-hive-1.0.3.tar.gz`, algorithm `nebhash`, wallet
    template `%WAL%.%WORKER_NAME%`, Pool URL `neb.ariabrain.com:3370`.
 5. Solo through your own node: `neb-node --run --dataset neb-datasets.bin --datadir data --miner-lock "$(neb-wallet --wallet wallet.txt lock)"`
    and `ffgn --node 127.0.0.1:3441` on the same computer (details in the manual).
