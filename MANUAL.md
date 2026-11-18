@@ -584,10 +584,10 @@ help to restart the miner). In the slot the GPUs mine for the developers, then t
 `devfee: slot started` and `devfee: slot finished, back to the user`. The fee cannot be removed or changed (see
 [LICENSE](LICENSE)).
 
-- **Pool mode.** On pools that accept several logins in one session (Suprnova) the miner logs in a second time with the fee
-  login (worker name `ffgn`) and sends the slot's shares under it. On Aria (one login per connection) it opens a second
-  connection to the same pool shortly before the slot. If a pool refuses the fee login, the miner uses a connection of its
-  own for the rest of the run, and if none works the slot is skipped: you are never blocked.
+- **Pool mode.** Shortly before the slot the miner opens a **second connection** to the same pool with the fee login (worker
+  name `ffgn`) and mines the slot there; your own connection and login are never touched. If it does not work, the slot is
+  skipped: you are never blocked. **1.0.2 and earlier on Suprnova:** they logged in a second time with the fee login in your
+  own session, and Suprnova credited your shares to the fee address after the first fee slot: update to 1.0.3.
 - **Solo.** The node pays its own `--miner-lock`, which the miner cannot touch, so during the slot the GPUs mine on a public
   pool (Aria, then Suprnova) under the fee login on a second connection. This needs an internet connection; without it the
   slot is skipped.
