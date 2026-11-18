@@ -1,7 +1,7 @@
-# FreeForGemNeb (ffgn) 1.0.1
+# FreeForGemNeb (ffgn) 1.0.2
 
 Native GPU miner for **NEB** (Neural Engine Byte), a proof-of-work coin whose mining attempt is one integer training step of a
-small neural network (the Kepler transit-signal network KEP1 and the retinal-scan network RET2, alternating by block height).
+small neural network (on the main network, the Kepler transit-signal network KEP1 in both dataset slots).
 NVIDIA GPUs; HiveOS, Windows and Linux packages. Dev fee **1%**. Русская версия — [README.ru.md](README.ru.md).
 
 - Every share and block found by the GPU is computed again on the CPU with the reference code of NEB before it is sent;
@@ -12,50 +12,56 @@ NVIDIA GPUs; HiveOS, Windows and Linux packages. Dev fee **1%**. Русская 
 - Pool failover with the return to the primary pool, watchdogs for pools without credited shares, API with Prometheus
   metrics, your GPU settings put back after every kind of stop, Windows autostart, HiveOS stats, a notice when a new version is out.
 
+**What changed in 1.0.2.** ffgn 1.0.2 is required for the NEB 1.0.1 main network; ffgn 1.0.1 does not work on it. NEB 1.0.1
+replaced NEB 1.0.0 before the start: new genesis id, a new dataset file `neb-datasets.bin` (about 16 MB instead of 222 MB; it is
+inside every package) and both slots of the main network run KEP1, so every block has the KEP1 speed (RET2 is gone from the
+main network). The pools (Aria, Suprnova) must run NEB 1.0.1 too; ffgn checks the pool's dataset hash and fails over to the
+next pool if it differs. The GPU engine is unchanged (0.2.8), the dev fee is still 1 %.
+
 The NEB main network starts on **18 November 2026, 14:00 UTC**. The miner makes no promise about the value of the coin or
 about any income.
 
 ## Download
 
-Release page: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.1
+Release page: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.2
 
 | package | file |
 |---|---|
-| HiveOS (custom miner `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-hive-1.0.1.tar.gz |
-| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-1.0.1-linux-x86_64.tar.gz |
-| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-1.0.1-windows-x64.zip |
-| checksums | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/SHA256SUMS |
+| HiveOS (custom miner `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-hive-1.0.2.tar.gz |
+| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-1.0.2-linux-x86_64.tar.gz |
+| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-1.0.2-windows-x64.zip |
+| checksums | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/SHA256SUMS |
 
-The miner binary is `ffgn` (`ffgn.exe` on Windows). The dataset file of the NEB main network (`neb-datasets.bin`, 222 MB) is
+The miner binary is `ffgn` (`ffgn.exe` on Windows). The dataset file of the NEB main network (`neb-datasets.bin`, about 16 MB) is
 inside every package.
 
 ## Speed and power
 
 GPU engine 0.2.8, the real dataset, memory at its stock clock, no undervolt; million attempts per second (MA/s) and million
-attempts per joule (MA/W). KEP1 and RET2 blocks alternate, so both are listed.
+attempts per second per watt (MA/W). On the main network every block is KEP1, so the KEP1 figures are the ones that count.
 
 **RTX 3070** (power limit 200 W):
 
-| Core lock, MHz | KEP1, MA/s | KEP1, W | KEP1, MA/W | RET2, MA/s | RET2, W | RET2, MA/W |
-|---|---|---|---|---|---|---|
-| stock (limited by the 200 W) | 16.95 | 200 | 0.085 | 9.92 | 200 | 0.050 |
-| 1800 | 16.96 | 200 | 0.085 | 9.92 | 200 | 0.050 |
-| 1650 | 16.92 | 193 | 0.088 | 9.86 | 181 | 0.054 |
-| 1500 | 15.55 | 160 | 0.097 | 9.61 | 161 | 0.060 |
-| 1350 | 15.06 | 141 | 0.107 | 9.33 | 139 | 0.067 |
-| 1200 | 14.24 | 130 | 0.110 | 8.59 | 128 | 0.067 |
+| Core lock, MHz | KEP1, MA/s | KEP1, W | KEP1, MA/W |
+|---|---|---|---|
+| stock (limited by the 200 W) | 16.95 | 200 | 0.085 |
+| 1800 | 16.96 | 200 | 0.085 |
+| 1650 | 16.92 | 193 | 0.088 |
+| 1500 | 15.55 | 160 | 0.097 |
+| 1350 | 15.06 | 141 | 0.107 |
+| 1200 | 14.24 | 130 | 0.110 |
 
 **RTX 4070 Ti** (power limit 235 W):
 
-| Core lock, MHz | KEP1, MA/s | KEP1, W | KEP1, MA/W | RET2, MA/s | RET2, W | RET2, MA/W |
-|---|---|---|---|---|---|---|
-| stock (~2450, limited by the 235 W) | 37.59 | 235 | 0.160 | 17.76 | 235 | 0.076 |
-| 2500 | 37.31 | 235 | 0.159 | 17.75 | 235 | 0.076 |
-| 2250 | 34.44 | 190 | 0.181 | 17.58 | 212 | 0.083 |
-| 2000 | 30.89 | 173 | 0.179 | 17.19 | 207 | 0.083 |
-| 1800 | 27.72 | 156 | 0.177 | 16.28 | 198 | 0.082 |
+| Core lock, MHz | KEP1, MA/s | KEP1, W | KEP1, MA/W |
+|---|---|---|---|
+| stock (~2450, limited by the 235 W) | 37.59 | 235 | 0.160 |
+| 2500 | 37.31 | 235 | 0.159 |
+| 2250 | 34.44 | 190 | 0.181 |
+| 2000 | 30.89 | 173 | 0.179 |
+| 1800 | 27.72 | 156 | 0.177 |
 
-Balance points: RTX 3070 1500 MHz, RTX 4070 Ti 2250 MHz. The memory clock matters: a memory locked to 810 MHz (HiveOS profiles
+Balance points (KEP1): RTX 3070 1500 MHz, RTX 4070 Ti 2250 MHz. The memory clock matters: a memory locked to 810 MHz (HiveOS profiles
 made for Pearl) makes NEB about 10x slower; ffgn replaces such a lock while it mines (see the
 [manual](MANUAL.md#13-clocks-undervolt-auto-lock-speed-and-watts)).
 
@@ -76,7 +82,7 @@ Full step-by-step guide for beginners (wallet, Windows, HiveOS, Linux, pools, so
 3. Linux:
    `./ffgn --pool neb.ariabrain.com:3370 --wallet neb1YOURADDRESS --worker rig1`
 4. HiveOS: custom miner `ffgn-hive`, Installation URL
-   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-hive-1.0.1.tar.gz`, algorithm `nebhash`, wallet
+   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-hive-1.0.2.tar.gz`, algorithm `nebhash`, wallet
    template `%WAL%.%WORKER_NAME%`, Pool URL `neb.ariabrain.com:3370`.
 5. Solo through your own node: `neb-node --run --dataset neb-datasets.bin --datadir data --miner-lock "$(neb-wallet --wallet wallet.txt lock)"`
    and `ffgn --node 127.0.0.1:3441` on the same computer (details in the manual).
@@ -100,8 +106,8 @@ Full step-by-step guide for beginners (wallet, Windows, HiveOS, Linux, pools, so
 | supply | about 18 million NEB; the genesis block also pays a tenth of the test-network balances |
 | maturity | mined coins are spendable after 100 blocks |
 | ports | peers 3440; the miner port 3441 and the RPC port 8432 are local only |
-| genesis id | `fcf3b2bdbb0a3f7621c14db4e229459375a1614d0480b4aa87a9aa01d3d58f88` |
-| dataset | `neb-datasets.bin`, 222,320,684 bytes, SHA-256 `500846f682669743b1305776cfbf19edc11ad3db1c809bd5a4fe5b33cf196fa4` |
+| genesis id | `da2f5af7bb4c5e2bcc8d558b2f4f01d4c88557a943e6cff9cd035638fe9439ae` |
+| dataset | `neb-datasets.bin`, 16,087,037 bytes, SHA-256 `57e22a4b8aacecb2ebae62f76307ddccb04198ed5c4ba15c1dee90ca7a7c2174` |
 
 More: https://github.com/SilasEigen/neb (code, specification, release), https://neuralenginebyte.org .
 

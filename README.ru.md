@@ -1,8 +1,7 @@
-# FreeForGemNeb (ffgn) 1.0.1
+# FreeForGemNeb (ffgn) 1.0.2
 
 Нативный GPU-майнер **NEB** (Neural Engine Byte) — монеты на proof-of-work, где попытка майнинга — один целочисленный шаг
-обучения небольшой нейросети (сеть KEP1 на транзитных сигналах Kepler и сеть RET2 на снимках сетчатки; они чередуются по
-высоте блока). Видеокарты NVIDIA; пакеты для HiveOS, Windows и Linux. Комиссия разработчика **1 %**.
+обучения небольшой нейросети (на основной сети — сеть KEP1 на транзитных сигналах Kepler в обоих слотах датасета). Видеокарты NVIDIA; пакеты для HiveOS, Windows и Linux. Комиссия разработчика **1 %**.
 English version — [README.md](README.md).
 
 - Каждая шара и каждый блок, найденные видеокартой, пересчитываются на процессоре эталонным кодом NEB до отправки; новые модели
@@ -14,49 +13,55 @@ English version — [README.md](README.md).
 - Резервные пулы с возвратом на основной, сторожа на случай, когда пул не засчитывает шары, API с метриками Prometheus, ваши
   настройки видеокарты возвращаются после любой остановки, автозапуск Windows, статистика HiveOS, уведомление о новой версии.
 
+**Что нового в 1.0.2.** ffgn 1.0.2 нужен для основной сети NEB 1.0.1; ffgn 1.0.1 на ней не работает. NEB 1.0.1 заменил
+NEB 1.0.0 до старта: новый genesis id, новый файл датасета `neb-datasets.bin` (около 16 МБ вместо 222 МБ; он лежит внутри
+каждого пакета), а оба слота основной сети работают на KEP1, поэтому в каждом блоке скорость KEP1 (RET2 с основной сети
+убрана). Пулы (Aria, Suprnova) тоже должны работать на NEB 1.0.1; ffgn сверяет хэш датасета пула и переключается на
+следующий пул, если он другой. GPU-движок не менялся (0.2.8), комиссия разработчика по-прежнему 1 %.
+
 Основная сеть NEB стартует **18 ноября 2026, 14:00 UTC**. Майнер ничего не обещает про стоимость монеты и какой-либо доход.
 
 ## Скачать
 
-Страница релиза: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.1
+Страница релиза: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.2
 
 | пакет | файл |
 |---|---|
-| HiveOS (кастомный майнер `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-hive-1.0.1.tar.gz |
-| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-1.0.1-linux-x86_64.tar.gz |
-| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-1.0.1-windows-x64.zip |
-| контрольные суммы | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/SHA256SUMS |
+| HiveOS (кастомный майнер `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-hive-1.0.2.tar.gz |
+| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-1.0.2-linux-x86_64.tar.gz |
+| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-1.0.2-windows-x64.zip |
+| контрольные суммы | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/SHA256SUMS |
 
-Бинарник майнера — `ffgn` (`ffgn.exe` на Windows). Файл датасета основной сети NEB (`neb-datasets.bin`, 222 МБ) лежит внутри
+Бинарник майнера — `ffgn` (`ffgn.exe` на Windows). Файл датасета основной сети NEB (`neb-datasets.bin`, около 16 МБ) лежит внутри
 каждого пакета.
 
 ## Скорость и мощность
 
 GPU-движок 0.2.8, настоящий датасет, память на стоковой частоте, без андервольта; миллионы попыток в секунду (MA/s) и
-миллионы попыток на джоуль (MA/W). Блоки KEP1 и RET2 чередуются, поэтому даны оба.
+миллионы попыток в секунду на ватт (MA/W). На основной сети каждый блок — KEP1, поэтому важны цифры KEP1.
 
 **RTX 3070** (лимит мощности 200 Вт):
 
-| Лок ядра, МГц | KEP1, MA/s | KEP1, Вт | KEP1, MA/W | RET2, MA/s | RET2, Вт | RET2, MA/W |
-|---|---|---|---|---|---|---|
+| Лок ядра, МГц | KEP1, MA/s | KEP1, Вт | KEP1, MA/W |
+|---|---|---|---|
 | сток (упор в лимит 200 Вт) | 16.95 | 200 | 0.085 | 9.92 | 200 | 0.050 |
-| 1800 | 16.96 | 200 | 0.085 | 9.92 | 200 | 0.050 |
-| 1650 | 16.92 | 193 | 0.088 | 9.86 | 181 | 0.054 |
-| 1500 | 15.55 | 160 | 0.097 | 9.61 | 161 | 0.060 |
-| 1350 | 15.06 | 141 | 0.107 | 9.33 | 139 | 0.067 |
-| 1200 | 14.24 | 130 | 0.110 | 8.59 | 128 | 0.067 |
+| 1800 | 16.96 | 200 | 0.085 |
+| 1650 | 16.92 | 193 | 0.088 |
+| 1500 | 15.55 | 160 | 0.097 |
+| 1350 | 15.06 | 141 | 0.107 |
+| 1200 | 14.24 | 130 | 0.110 |
 
 **RTX 4070 Ti** (лимит мощности 235 Вт):
 
-| Лок ядра, МГц | KEP1, MA/s | KEP1, Вт | KEP1, MA/W | RET2, MA/s | RET2, Вт | RET2, MA/W |
-|---|---|---|---|---|---|---|
+| Лок ядра, МГц | KEP1, MA/s | KEP1, Вт | KEP1, MA/W |
+|---|---|---|---|
 | сток (~2450, упор в лимит 235 Вт) | 37.59 | 235 | 0.160 | 17.76 | 235 | 0.076 |
-| 2500 | 37.31 | 235 | 0.159 | 17.75 | 235 | 0.076 |
-| 2250 | 34.44 | 190 | 0.181 | 17.58 | 212 | 0.083 |
-| 2000 | 30.89 | 173 | 0.179 | 17.19 | 207 | 0.083 |
-| 1800 | 27.72 | 156 | 0.177 | 16.28 | 198 | 0.082 |
+| 2500 | 37.31 | 235 | 0.159 |
+| 2250 | 34.44 | 190 | 0.181 |
+| 2000 | 30.89 | 173 | 0.179 |
+| 1800 | 27.72 | 156 | 0.177 |
 
-Точки баланса: RTX 3070 — 1500 МГц, RTX 4070 Ti — 2250 МГц. Частота памяти важна: память с локом 810 МГц (профили HiveOS для
+Точки баланса (KEP1): RTX 3070 — 1500 МГц, RTX 4070 Ti — 2250 МГц. Частота памяти важна: память с локом 810 МГц (профили HiveOS для
 Pearl) замедляет NEB примерно в 10 раз; ffgn на время майнинга заменяет такой лок (см.
 [руководство](MANUAL.ru.md)).
 
@@ -77,7 +82,7 @@ Pearl) замедляет NEB примерно в 10 раз; ffgn на врем�
 3. Linux:
    `./ffgn --pool neb.ariabrain.com:3370 --wallet neb1ВАШАДРЕС --worker rig1`
 4. HiveOS: кастомный майнер `ffgn-hive`, Installation URL
-   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-hive-1.0.1.tar.gz`, алгоритм `nebhash`, шаблон
+   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-hive-1.0.2.tar.gz`, алгоритм `nebhash`, шаблон
    кошелька `%WAL%.%WORKER_NAME%`, Pool URL `neb.ariabrain.com:3370`.
 5. Соло через свою ноду: `neb-node --run --dataset neb-datasets.bin --datadir data --miner-lock "$(neb-wallet --wallet wallet.txt lock)"`
    и `ffgn --node 127.0.0.1:3441` на том же компьютере (подробности в руководстве).
@@ -101,8 +106,8 @@ Pearl) замедляет NEB примерно в 10 раз; ffgn на врем�
 | эмиссия | около 18 млн NEB; генезис-блок дополнительно платит десятую часть балансов тестовых сетей |
 | зрелость | добытые монеты можно тратить через 100 блоков |
 | порты | пиры 3440; порт майнеров 3441 и порт RPC 8432 только локальные |
-| genesis id | `fcf3b2bdbb0a3f7621c14db4e229459375a1614d0480b4aa87a9aa01d3d58f88` |
-| датасет | `neb-datasets.bin`, 222 320 684 байта, SHA-256 `500846f682669743b1305776cfbf19edc11ad3db1c809bd5a4fe5b33cf196fa4` |
+| genesis id | `da2f5af7bb4c5e2bcc8d558b2f4f01d4c88557a943e6cff9cd035638fe9439ae` |
+| датасет | `neb-datasets.bin`, 16 087 037 байт, SHA-256 `57e22a4b8aacecb2ebae62f76307ddccb04198ed5c4ba15c1dee90ca7a7c2174` |
 
 Подробнее: https://github.com/SilasEigen/neb (код, спецификация, релиз), https://neuralenginebyte.org .
 

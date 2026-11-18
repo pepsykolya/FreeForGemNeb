@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.1 — manual for beginners
+# FreeForGemNeb (ffgn) 1.0.2 — manual for beginners
 
 This guide takes you from zero to a running **NEB** miner: a wallet, the miner on Windows, HiveOS or Linux, and the two ways
 to mine (through a pool, or solo through your own node). Русская версия — [MANUAL.ru.md](MANUAL.ru.md). HiveOS in detail:
@@ -29,9 +29,15 @@ to mine (through a pool, or solo through your own node). Русская верс
 ## 1. What NEB is, in short
 
 NEB (Neural Engine Byte) is a proof-of-work coin. One mining attempt is one integer training step of a small neural network
-that the chain itself owns. There are two networks and the block height decides which one works: **KEP1** (a network on
-NASA Kepler transit signals) and **RET2** (a network on retinal scans of the OCTMNIST set). They alternate from block to
-block, so the speed of any miner jumps up and down between odd and even blocks: that is normal (section 18).
+that the chain itself owns. On the main network (NEB 1.0.1) both dataset slots run **KEP1**, a network on NASA Kepler transit
+signals (slot 0: Kepler transit signals, 13,404 samples; slot 1: TESS signals, 7,089 samples, eclipse or junk), so every block
+has the same speed (section 18). The retinal-scan network RET2 is gone from the main network; it exists only on the old test
+network.
+
+**What changed in 1.0.2.** ffgn 1.0.2 is required for the NEB 1.0.1 main network; ffgn 1.0.1 does not work on it. NEB 1.0.1
+(https://github.com/SilasEigen/neb/releases/tag/v1.0.1) replaced NEB 1.0.0 before the start (the start time is unchanged): new
+genesis id, a new dataset file (about 16 MB instead of 222 MB). The pools (Aria, Suprnova) must run NEB 1.0.1 too; ffgn checks
+the pool's dataset hash and fails over to the next pool if it differs. The GPU engine is unchanged (0.2.8), the dev fee is 1 %.
 
 The main network starts on **Wednesday 18 November 2026, 14:00 UTC** (17:00 Moscow time). A block takes about 60 seconds, the
 reward is 20 NEB per block (5 % of it goes to the NEB project, the miner gets 19 NEB plus fees), and mined coins can be spent
@@ -46,7 +52,7 @@ about the value of the coin or about any income.
 - The NVIDIA driver with CUDA 12 support (R525 or newer; RTX 50 needs R570 or newer). Windows tested on 576.57. You do **not**
   need to install CUDA.
 - Windows 10/11 x64, or Linux x86_64 (glibc 2.30 or newer, e.g. Ubuntu 20.04 and later), or a HiveOS rig.
-- The dataset file `neb-datasets.bin` (222 MB) is **inside the package**: nothing else to download for pool mining. The miner
+- The dataset file `neb-datasets.bin` (about 16 MB) is **inside the package**: nothing else to download for pool mining. The miner
   checks its BLAKE3 hash at every start.
 - **The clock of the computer must be right** (automatic time synchronisation on). A NEB node refuses a block dated more
   than 120 seconds ahead of its clock; a drifting clock also hurts pool mining (stale shares).
@@ -94,21 +100,22 @@ immature. Pools pay by their own rules (section 9).
 
 | Package | File | Contents |
 |---|---|---|
-| Windows x64 | `ffgn-1.0.1-windows-x64.zip` | `ffgn.exe`, `nebgpu.dll`, `neb-datasets.bin`, `start.bat`, `start-suprnova.bat`, `start-solo.bat`, `start.ps1`, `install-autostart.bat`, `remove-autostart.bat`, README, MANUAL, LICENSE, NOTICE |
-| Linux x86_64 | `ffgn-1.0.1-linux-x86_64.tar.gz` | `ffgn`, `libnebgpu.so`, `neb-datasets.bin`, docs |
-| HiveOS | `ffgn-hive-1.0.1.tar.gz` | the custom miner `ffgn-hive`: `ffgn`, `libnebgpu.so`, `neb-datasets.bin`, `h-*.sh`, docs |
+| Windows x64 | `ffgn-1.0.2-windows-x64.zip` | `ffgn.exe`, `nebgpu.dll`, `neb-datasets.bin`, `start.bat`, `start-suprnova.bat`, `start-solo.bat`, `start.ps1`, `install-autostart.bat`, `remove-autostart.bat`, README, MANUAL, LICENSE, NOTICE |
+| Linux x86_64 | `ffgn-1.0.2-linux-x86_64.tar.gz` | `ffgn`, `libnebgpu.so`, `neb-datasets.bin`, docs |
+| HiveOS | `ffgn-hive-1.0.2.tar.gz` | the custom miner `ffgn-hive`: `ffgn`, `libnebgpu.so`, `neb-datasets.bin`, `h-*.sh`, docs |
 
-Release page: https://github.com/pepsykolya/FreeForGemNeb/releases (tag `v1.0.1`). The GPU engine (`nebgpu.dll` /
+Release page: https://github.com/pepsykolya/FreeForGemNeb/releases (tag `v1.0.2`). The GPU engine (`nebgpu.dll` /
 `libnebgpu.so`) is closed source and ships as a binary; everything else is described in NOTICE.
 
-**Check the download** against `SHA256SUMS` of the release. Windows: `certutil -hashfile ffgn-1.0.1-windows-x64.zip SHA256`;
-Linux: `sha256sum -c SHA256SUMS`. The dataset file `neb-datasets.bin` in the package is the file of the NEB 1.0.0 main
-network, unchanged:
+**Check the download** against `SHA256SUMS` of the release. Windows: `certutil -hashfile ffgn-1.0.2-windows-x64.zip SHA256`;
+Linux: `sha256sum -c SHA256SUMS`. The dataset file `neb-datasets.bin` in the package is the file of the NEB 1.0.1 main
+network (it was 222 MB for NEB 1.0.0; ffgn 1.0.2 refuses that old file and tells what to download). Source:
+https://github.com/SilasEigen/neb/releases/download/v1.0.1/neb-datasets.bin ; it holds two NMD2 datasets, both of the KEP1 network:
 
 ```
-size     222320684 bytes
-SHA-256  500846f682669743b1305776cfbf19edc11ad3db1c809bd5a4fe5b33cf196fa4
-BLAKE3   fbabd0bdde0b43aef946e7031ff6e037c8a2a5d0ae2616b49b2b49b11af8010e
+size     16087037 bytes
+SHA-256  57e22a4b8aacecb2ebae62f76307ddccb04198ed5c4ba15c1dee90ca7a7c2174
+BLAKE3   790b57fbd830f3dcbe7de9d1146aa89a0a20799118e30dd48a343a5c98f19e72
 ```
 
 Self-test of the miner and your GPU (no network needed): `ffgn.exe --self-test`. It checks the built-in reference code
@@ -127,7 +134,7 @@ dataset. It ends with `NEB self-test passed`.
 
 ## 6. Windows
 
-1. Download `ffgn-1.0.1-windows-x64.zip`, check it (section 4) and unpack it into a folder **without spaces and without
+1. Download `ffgn-1.0.2-windows-x64.zip`, check it (section 4) and unpack it into a folder **without spaces and without
    non-English letters**, for example `C:\FFGN`. Needs only the NVIDIA driver, no CUDA.
 2. Pick the start file:
 
@@ -178,7 +185,7 @@ software; unblock it or add the folder to the exclusions if you trust the file (
 ## 7. Linux
 
 ```bash
-mkdir -p ~/ffgn && tar -xzf ffgn-1.0.1-linux-x86_64.tar.gz -C ~/ffgn && cd ~/ffgn/ffgn-1.0.1
+mkdir -p ~/ffgn && tar -xzf ffgn-1.0.2-linux-x86_64.tar.gz -C ~/ffgn && cd ~/ffgn/ffgn-1.0.2
 export CUDA_DEVICE_ORDER=PCI_BUS_ID        # GPU numbers as in nvidia-smi
 ./ffgn --pool neb.ariabrain.com:3370 --wallet neb1YOURADDRESS --worker rig1
 ```
@@ -215,7 +222,7 @@ Config*:
 | Field | Value |
 |---|---|
 | Miner name | `ffgn-hive` (filled in from the URL) |
-| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.1/ffgn-hive-1.0.1.tar.gz` |
+| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.2/ffgn-hive-1.0.2.tar.gz` |
 | Hash algorithm | `nebhash` |
 | Wallet and worker template | `%WAL%.%WORKER_NAME%` |
 | Pool URL | `neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804` (several = failover; the first is the primary) |
@@ -224,7 +231,7 @@ Config*:
 
 Apply it to the rig. The dataset is inside the package. The miner uses every GPU of the rig. Log: `miner log`. The dashboard
 shows speed per GPU (1 "hash" = 1 attempt, so kH/s = MA/s x 1000), temperature, fans, accepted/rejected shares, and the version
-column carries the efficiency (`1.0.1 0.0240 MA/W`) and `need update!!` when a newer release exists.
+column carries the efficiency (`1.0.2 0.0240 MA/W`) and `need update!!` when a newer release exists.
 
 - The clock of the rig must be right: check `timedatectl` (time synchronisation on).
 - The miner's own clock and undervolt options win over the OC profile while it runs; your values are put back when it
@@ -268,7 +275,7 @@ answer each share; its page and the miner's "sent" counters are the proof that s
 You run the official NEB node on the same computer; ffgn takes the work from its work port `127.0.0.1:3441`, and the block
 reward goes to the address behind the node's `--miner-lock`.
 
-**Get the node and the wallet** from the official NEB release page https://github.com/SilasEigen/neb/releases/tag/v1.0.1 :
+**Get the node and the wallet** from the official NEB release page https://github.com/SilasEigen/neb/releases/tag/v1.0.2 :
 the archive for your system (`neb-1.0.1-windows-x86_64.zip` or `neb-1.0.1-linux-x86_64.tar.gz`) and `SHA256SUMS`. The Linux
 node needs glibc 2.34 or newer. **Check before you run anything:** compare the SHA-256 of the archive with `SHA256SUMS`
 (PowerShell: `Get-FileHash -Algorithm SHA256 <file>`) and verify the signature of `SHA256SUMS` (`SHA256SUMS.asc`, key
@@ -302,7 +309,7 @@ $lock = .\neb-wallet.exe --wallet wallet.txt lock
 (the wallet asks for the password to print the lock; you can also paste the 64 hex characters.) Make sure the lock is **yours**.
 
 - The node prints its **genesis id**; on the main network it must be
-  `fcf3b2bdbb0a3f7621c14db4e229459375a1614d0480b4aa87a9aa01d3d58f88` (`neb-node --genesis` prints it too).
+  `da2f5af7bb4c5e2bcc8d558b2f4f01d4c88557a943e6cff9cd035638fe9439ae` (`neb-node --genesis` prints it too).
 - It dials the public relays `seed1.neuralenginebyte.org:3440` and `seed2.neuralenginebyte.org:3440` and finds more peers.
 - **Before the start** (14:00 UTC on 18 November) the node sits at height 0 and says how long is left. That is normal. Start
   the node and the miner early: the miner connects at any time and gets its first job about two minutes before the start.
@@ -352,7 +359,7 @@ GPU in `--devices` order (`-` = leave that GPU alone).
 | `--worker NAME` | worker name (login `ADDRESS.NAME`; default none) |
 | `--password TEXT` | pool password (default `x`); for a gate: the gate token |
 | `--node HOST:PORT[,..]` | solo: work service of a NEB node (default port 3441; local only) |
-| `--dataset FILE` | `neb-datasets.bin` (default: next to the binary, in the working folder, or the HiveOS folder) |
+| `--dataset FILE` | `neb-datasets.bin` (default: next to the binary, in the working folder, or the HiveOS folder). A job is mined only with the dataset file of its own network; for the old test network pass the testnet file of NEB 0.3.1 here |
 | `--gate`, `--gate-listen ADDR`, `--gate-token-file FILE`, `--gate-slots-bits B` | run the gate (section 11) |
 | `--pool-check` | log in to every pool of the list, print the verdicts, exit (no GPU needed) |
 
@@ -364,7 +371,7 @@ GPU in `--devices` order (`-` = leave that GPU alone).
 | `--minutes N` | stop after N minutes (settings are put back) |
 | `--blocks N` | stop after N accepted blocks (solo tests) |
 | `--self-test` | reference vs the NEB vectors, the engine's self-test, device hits vs reference; exit |
-| `--hash-bench SECS` | attempts per second per GPU for KEP1 and RET2, with watts; exit |
+| `--hash-bench SECS` | attempts per second per GPU for KEP1 (and RET2 of the test network), with watts; exit |
 | `--backend cuda\|cpu`, `--cpu-threads N` | `cuda` (default) is the GPU engine; `cpu` is the reference on CPU threads, for tests only |
 | `--gpu-state` | print the state of the GPUs (NVML) |
 | `--no-color`, `--version`, `--help` | log colours off (also `NO_COLOR=1`); version; help |
@@ -452,42 +459,41 @@ Simple recipes (Windows: `AUTO_UV`, `AUTO_LOCK` in the `.bat`, run as administra
   10 % of the top speed. The result is saved (`autolock.json`) and applied at once on later starts; `--auto-lock-reset`
   sweeps again. A GPU with its own `--lock-cclock` is not swept.
 
-The speed alternates between KEP1 and RET2 blocks, so a measurement over a few minutes is noisy; the miner's efficiency
-number is an average.
+On the main network every block is KEP1, so the speed is steady; the figures below are KEP1. A measurement over a few minutes
+can still be noisy; the miner's efficiency number is an average.
 
 **RTX 3070, GPU engine 0.2.8** (core lock, power limit 200 W, memory at its stock 7001 MHz, no undervolt, the real dataset;
-speed in million attempts per second, efficiency in million attempts per joule):
+speed in million attempts per second, efficiency in million attempts per second per watt):
 
-| Core lock, MHz | KEP1, MA/s | KEP1, W | KEP1, MA/W | RET2, MA/s | RET2, W | RET2, MA/W |
-|---|---|---|---|---|---|---|
-| stock (limited by the 200 W) | 16.95 | 200 | 0.085 | 9.92 | 200 | 0.050 |
-| 1800 | 16.96 | 200 | 0.085 | 9.92 | 200 | 0.050 |
-| 1650 | 16.92 | 193 | 0.088 | 9.86 | 181 | 0.054 |
-| 1500 | 15.55 | 160 | 0.097 | 9.61 | 161 | 0.060 |
-| 1350 | 15.06 | 141 | 0.107 | 9.33 | 139 | 0.067 |
-| 1200 | 14.24 | 130 | 0.110 | 8.59 | 128 | 0.067 |
+| Core lock, MHz | KEP1, MA/s | KEP1, W | KEP1, MA/W |
+|---|---|---|---|
+| stock (limited by the 200 W) | 16.95 | 200 | 0.085 |
+| 1800 | 16.96 | 200 | 0.085 |
+| 1650 | 16.92 | 193 | 0.088 |
+| 1500 | 15.55 | 160 | 0.097 |
+| 1350 | 15.06 | 141 | 0.107 |
+| 1200 | 14.24 | 130 | 0.110 |
 
 **RTX 4070 Ti, GPU engine 0.2.8** (stock power limit 235 W, memory at its stock 10251 MHz, no undervolt, the real dataset):
 
-| Core lock, MHz | KEP1, MA/s | KEP1, W | KEP1, MA/W | RET2, MA/s | RET2, W | RET2, MA/W |
-|---|---|---|---|---|---|---|
-| stock (~2450, limited by the 235 W) | 37.59 | 235 | 0.160 | 17.76 | 235 | 0.076 |
-| 2500 | 37.31 | 235 | 0.159 | 17.75 | 235 | 0.076 |
-| 2250 | 34.44 | 190 | 0.181 | 17.58 | 212 | 0.083 |
-| 2000 | 30.89 | 173 | 0.179 | 17.19 | 207 | 0.083 |
-| 1800 | 27.72 | 156 | 0.177 | 16.28 | 198 | 0.082 |
+| Core lock, MHz | KEP1, MA/s | KEP1, W | KEP1, MA/W |
+|---|---|---|---|
+| stock (~2450, limited by the 235 W) | 37.59 | 235 | 0.160 |
+| 2500 | 37.31 | 235 | 0.159 |
+| 2250 | 34.44 | 190 | 0.181 |
+| 2000 | 30.89 | 173 | 0.179 |
+| 1800 | 27.72 | 156 | 0.177 |
 
 On the RTX 3070 the best efficiency is near 1350 MHz and 1500 MHz is a balance (about 8 % less speed for 20 % less power); on
-the RTX 4070 Ti 2250 MHz is the balance (about 4 % less speed for 10-19 % less power). KEP1 and RET2 blocks alternate, so the
-average speed of a run lies between the two columns (RTX 3070 stock: about 12.5 MA/s, RTX 4070 Ti: about 24 MA/s). The
-numbers are the engine benchmark on the real main-network dataset and test runs (the mining loop gives the same speed);
+the RTX 4070 Ti 2250 MHz is the balance (about 4 % less speed for 10-19 % less power). Every main-network block is KEP1, so
+the speed of a run is the KEP1 figure of the table. The numbers are the engine benchmark on the real main-network dataset and test runs (the mining loop gives the same speed);
 your card, cooling and silicon will give somewhat different numbers.
 
 ### Memory clock
 
 NEB reads its tables from the video memory all the time: the hash rate follows the memory clock. A memory clock locked low (the
 HiveOS OC profiles made for Pearl lock it to 810 MHz; MSI Afterburner profiles with a memory underclock) makes NEB several
-times slower. Measured with engine 0.2.8: RTX 3070 at 5001 MHz instead of 7001 — KEP1 12.55 / RET2 7.40 MA/s (−26 % / −25 %),
+times slower. Measured with engine 0.2.8 (RET2 figures are for the test network only): RTX 3070 at 5001 MHz instead of 7001 — KEP1 12.55 / RET2 7.40 MA/s (−26 % / −25 %),
 at 810 MHz — 1.64 / 0.97 MA/s (−90 %); RTX 4070 Ti at 5001 MHz — RET2 8.85 MA/s (−50 %; KEP1 stays near 37.7, its table fits in
 the cache), at 810 MHz — RET2 1.18 MA/s (−93 %). ffgn therefore:
 
@@ -579,11 +585,11 @@ The fee address (public, so you can check it on the pools):
 | Symptom | What to check |
 |---|---|
 | The window closes at once | Run `start.bat` from a command prompt to read the message. Typical: `WALLET` is empty or wrong (`neb1...`, lower case); `nvidia-smi.exe not found` (install the NVIDIA driver); a file is missing (unpack the whole archive). |
-| `dataset ... BLAKE3` error | `neb-datasets.bin` is damaged or not the main network's file. Unpack the package again and compare the SHA-256 (section 4). |
+| `dataset ... BLAKE3` error | `neb-datasets.bin` is damaged or is not the NEB 1.0.1 main-network file (the 222 MB file of NEB 1.0.0 is refused by ffgn 1.0.2). Unpack the package again and compare the SHA-256 (section 4). |
 | `--self-test` fails or GPU errors | Update the NVIDIA driver; check cooling and power; try without clock and undervolt options (`--uv-reset-all` forgets old profiles). |
 | No accepted shares | Check the pool address and port, the address (`neb1...`), and that the pool is on the main network. `ffgn --pool-check --pool HOST:PORT` tests the login. On Aria look at the pool's page: Aria does not answer shares one by one. Wait a few minutes: the share difficulty adapts to your speed. |
 | Many stale / rejected shares | The clock is wrong (turn on time synchronisation: Windows `w32tm /resync`, Linux `timedatectl`), or the connection to the pool is slow or lossy. A few stale shares right after a new block are normal. |
-| The speed jumps up and down | Normal: the blocks alternate between two networks. KEP1 blocks run about twice as fast in attempts per second as RET2 blocks; the average is what counts. |
+| The speed jumps up and down | On the main network every block is KEP1, so the speed should be steady. Short dips come from the pool (new jobs), the clock or thermal limits. |
 | The speed is lower than in the table | Thermal or power limit, a lower clock lock, a laptop, another program on the GPU. Look at `--gpu-state` and the log (`--temp-limit`, idle mode). |
 | The miner restarts itself | The message before the restart says why: a GPU fault (the undervolt offset is stepped down), a dead link, or the watchdog. Repeated GPU faults: use `--uv-reset-all` and a lower `--uv-max`, or no undervolt. |
 | Solo: the miner gets no job | The node must run with `--miner-lock` on the **same** computer (port 3441 is local), and it must be synchronised. Before 14:00 UTC on 18 November the first job comes about two minutes before the start. |
