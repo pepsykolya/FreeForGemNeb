@@ -265,7 +265,8 @@ ffgn --pool neb.ariabrain.com:3370,stratum+tcp://neb.suprnova.cc:7804 --wallet n
 ```
 
 Address forms: `HOST:PORT`, `stratum+tcp://HOST:PORT` (plain TCP), `stratum+ssl://HOST:PORT` (TLS). Check a pool without a GPU
-and without sending anything: `ffgn --pool-check --pool neb.ariabrain.com:3370` (connects, logs in, waits for a job, exits).
+and without sending anything: `ffgn --pool-check --pool neb.ariabrain.com:3370` (connects, logs in, waits for a job, checks that the job is of the network of
+your dataset file, exits; a pool on another network is `FAILED: WRONG NETWORK`).
 
 Where to see your shares: the miner log (section 16) and the statistics page of the pool (enter your address). Aria does not
 answer each share; its page and the miner's "sent" counters are the proof that shares arrive. Suprnova answers every share.
@@ -446,7 +447,9 @@ that an unstable card does not always crash: it can compute a **wrong** answer. 
 `--auto-uv` in a separate process: the NEB engine at full load and the GPU tickets compared **bit for bit** with the C
 reference of NEB. Only a step that passes is kept. Results are saved per GPU, coin and clock lock; while one GPU is checked the
 others keep mining; a GPU that crashes while mining is named in the log, remembered in `gpu-faults.json`, and gets a lower
-offset, and a card with nothing left to lower is left out for an hour.
+offset, and a card with nothing left to lower is left out for an hour. After a crash or a failed check (1.0.3) the card does
+not tune again from +0: it resumes 2 steps (30 MHz) below the failed offset, never above the last confirmed one, after a
+30 s check, and mines; if that fails too, 2 steps lower again, down to the base.
 
 Simple recipes (Windows: `AUTO_UV`, `AUTO_LOCK` in the `.bat`, run as administrator):
 
