@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.5
+# FreeForGemNeb (ffgn) 1.0.6
 
 Native GPU miner for **NEB** (Neural Engine Byte), a proof-of-work coin whose mining attempt is one integer training step of a
 small neural network (on the main network, the Kepler transit-signal network KEP1 in both dataset slots).
@@ -11,6 +11,8 @@ NVIDIA GPUs; HiveOS, Windows and Linux packages. Dev fee **1%**. Русская 
   GPU by measurement, clock locks, temperature limit for laptops, idle mode on Windows.
 - Pool failover with the return to the primary pool, watchdogs for pools without credited shares, API with Prometheus
   metrics, your GPU settings put back after every kind of stop, Windows autostart, HiveOS stats, a notice when a new version is out.
+
+**What changed in 1.0.6** (recommended for everyone). GPU engine 0.3.0: on the trained models of the chain many samples already give the target output (their error is 0), so their table rows are all zeros; both KEP1 kernels no longer read them. The results are the same bit for bit (NEB test vectors, the CPU reference on every share). The KEP1 kernel (dp4a or warp) is now chosen again at every new model, timed on its first mining launches (both kernels give the same results, so no attempt is lost); the log line `GPU0: KEP1 kernel ...` appears when the choice changes, the API field `kep1_kernel` shows the latest one. Measured (engine benchmark, the chain's models): RTX 3070 at a 1650 MHz lock and a 200 W limit: Kepler 16.5 -> 19.3 MA/s (+17 %), TESS 20.2 -> 25.9 MA/s (+29 %), it now mines with the warp kernel on both slots; RTX 4070 Laptop GPU: +8 to +15 %.
 
 **What changed in 1.0.5** (recommended for everyone). **A new KEP1 kernel for RTX 30 / 40 / 50** (and RTX A-series): one attempt per GPU warp on the int8 tensor cores. The miner times both kernels on the first model of each dataset slot and keeps the faster one for that slot (`--kep1-kernel auto|dp4a|warp`; the log line `GPU0: KEP1 kernel ...` and the API field `kep1_kernel` show the choice). The results are the same bit for bit (NEB test vectors, the CPU reference on every share). Measured (engine benchmark, the real dataset): RTX 4070 Laptop GPU about 1.6x on both slots (Kepler 20.8 -> 33.4, TESS 20.7 -> 33.5 MA/s); RTX 3070 (its rate is set by the memory): no change, the miner keeps the old kernel there (on the initial model the new one was faster on TESS, 17.8 -> 20.3, but on the chain's trained models it is not: 19.8 vs 20.7). RTX 40 desktop and RTX 50 cards were not measured by us yet. `--auto-uv` is safe on big rigs with a weak CPU or power: it starts with 1 GPU at a time on 6+ GPUs (else 2) and grows to 2 and 4 only while the rig stays healthy (`--uv-parallel N` to fix it; the other GPUs mine meanwhile), every step that lowered the power is saved at once, and guards stop endless tuning: 3 failures in a row turn auto-uv off for a GPU for 24 h, 2 restarts or reboots during a tuning within an hour pause it on the rig (`--uv-unpause`), at most 10 min per GPU and 60 min per run, and after an unclean end the rig mines 7 min first. The power of a step is averaged after 10 s under load (25 s steps), a step that did not clearly lower it is measured again in the order best-step-best-step, and the log shows the spread (sd) of every measurement. Rigs of 4+ GPUs: after a pause the GPUs return to full load one by one (`--ramp-ms`, 500 ms apart), a new block's model is built 30 ms apart per GPU, and when all GPUs stop at the same moment the log says so (`all N GPUs stalled at once ...: likely a PCIe bus / power event`).
 
@@ -29,14 +31,14 @@ about any income.
 
 ## Download
 
-Release page: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.5
+Release page: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.6
 
 | package | file |
 |---|---|
-| HiveOS (custom miner `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.5/ffgn-hive-1.0.5.tar.gz |
-| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.5/ffgn-1.0.5-linux-x86_64.tar.gz |
-| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.5/ffgn-1.0.5-windows-x64.zip |
-| checksums | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.5/SHA256SUMS |
+| HiveOS (custom miner `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/ffgn-hive-1.0.6.tar.gz |
+| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/ffgn-1.0.6-linux-x86_64.tar.gz |
+| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/ffgn-1.0.6-windows-x64.zip |
+| checksums | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/SHA256SUMS |
 
 The miner binary is `ffgn` (`ffgn.exe` on Windows). The dataset file of the NEB main network (`neb-datasets.bin`, about 16 MB) is
 inside every package.
@@ -45,6 +47,20 @@ inside every package.
 
 Million attempts per second (MA/s) and million attempts per second per watt (MA/W), the real dataset, memory at its stock
 clock, no undervolt. On the main network every block is KEP1 (slot 0 Kepler, slot 1 TESS: two datasets of different size).
+
+**GPU engine 0.3.0 (ffgn 1.0.6)**, engine benchmark on the chain's trained models (19.11.2026, 8 s x 2 rounds, auto choice):
+
+| GPU | slot | 1.0.5, MA/s | 1.0.6, MA/s | 1.0.6, W | 1.0.6, MA/W | kernel |
+|---|---|---|---|---|---|---|
+| RTX 3070 (core lock 1650 MHz, power limit 200 W) | Kepler | 16.1-16.5 | 19.33 | 160 | 0.121 | warp |
+| RTX 3070 (core lock 1650 MHz, power limit 200 W) | TESS | 20.17 | 25.93 | 172 | 0.151 | warp |
+| RTX 4070 Laptop GPU (hot, 86 C, ~45-50 W) | Kepler | 29.7 | 32.7 | ~51 | 0.64 | warp |
+| RTX 4070 Laptop GPU (hot, 86 C, ~45-50 W) | TESS | 26.2 | 30.1 | ~45 | 0.67 | warp |
+
+RTX 3070: 1.0.5 (engine 0.2.9) measured both kernels once, on the first model of a slot, and kept dp4a or warp for good; on the
+chain's models of today both read every row and the card is limited by its memory. 1.0.6 skips the zero rows and picks warp on
+both slots. RTX 4070 Laptop GPU: the 1.0.5 column is engine 0.3.0 with the zero rows read (`NEBGPU_DEADSKIP=0`, the same kernels
+as 0.2.9). RTX 40 desktop and RTX 50 cards were not measured by us with 0.3.0 yet.
 
 **GPU engine 0.2.9 (ffgn 1.0.5): both KEP1 kernels**, engine benchmark, the same conditions for both, measured 19.11.2026:
 
@@ -104,7 +120,7 @@ Full step-by-step guide for beginners (wallet, Windows, HiveOS, Linux, pools, so
 3. Linux:
    `./ffgn --pool neb.ariabrain.com:3370 --wallet neb1YOURADDRESS --worker rig1`
 4. HiveOS: custom miner `ffgn-hive`, Installation URL
-   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.5/ffgn-hive-1.0.5.tar.gz`, algorithm `nebhash`, wallet
+   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/ffgn-hive-1.0.6.tar.gz`, algorithm `nebhash`, wallet
    template `%WAL%.%WORKER_NAME%`, Pool URL `neb.ariabrain.com:3370`.
 5. Solo through your own node: `neb-node --run --dataset neb-datasets.bin --datadir data --miner-lock "$(neb-wallet --wallet wallet.txt lock)"`
    and `ffgn --node 127.0.0.1:3441` on the same computer (details in the manual).

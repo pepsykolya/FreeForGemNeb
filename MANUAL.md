@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.5 — manual for beginners
+# FreeForGemNeb (ffgn) 1.0.6 — manual for beginners
 
 This guide takes you from zero to a running **NEB** miner: a wallet, the miner on Windows, HiveOS or Linux, and the two ways
 to mine (through a pool, or solo through your own node). Русская версия — [MANUAL.ru.md](MANUAL.ru.md). HiveOS in detail:
@@ -404,7 +404,7 @@ otherwise it is reset.
 | `--uv-parallel N` | 1.0.5: GPUs tuned (or re-checked from a saved profile) at the same time, the others mine meanwhile; default auto: 1 on rigs of 6+ GPUs, else 2, then 1 -> 2 -> 4 after 2 GPUs tuned without trouble (never above the free CPU threads nor the RAM of the checks); trouble -> 1, remembered for the rig |
 | `--uv-unpause` | 1.0.5: forget the guards of auto-uv (a rig paused after restarts during a tuning, GPUs off for 24 h, the remembered caution); also `--uv-reset-all` |
 | `--ramp-ms N` | 1.0.5: after a pause the GPUs go back to full load one by one, N ms apart (default 500 on rigs of 4+ GPUs, else 0); such rigs also build a new block's model 30 ms apart per GPU |
-| `--kep1-kernel auto\|dp4a\|warp` | 1.0.5: the KEP1 attempt kernel (default auto: both timed on the first model of each dataset slot, the faster kept; `warp` needs RTX 30 / A-series or newer) |
+| `--kep1-kernel auto\|dp4a\|warp` | 1.0.5: the KEP1 attempt kernel (default auto; 1.0.6: both timed at every new model on its first mining launches, the faster kept; `warp` needs RTX 30 / A-series or newer) |
 | `--uv-dir DIR` | where the profiles are kept (default next to the binary; `/hive-config/ffgn` on HiveOS) |
 | `--uv-reset`, `--uv-reset-all` | forget the profile of the current clocks / every saved result |
 | `--auto-uv-dry-run` | only log what `--auto-uv` would change |
@@ -534,6 +534,20 @@ can still be noisy; the miner's efficiency number is an average.
 
 Million attempts per second (MA/s) and million attempts per second per watt (MA/W), the real dataset, memory at its stock
 clock, no undervolt. On the main network every block is KEP1 (slot 0 Kepler, slot 1 TESS: two datasets of different size).
+
+**GPU engine 0.3.0 (ffgn 1.0.6)**, engine benchmark on the chain's trained models (19.11.2026, 8 s x 2 rounds, auto choice):
+
+| GPU | slot | 1.0.5, MA/s | 1.0.6, MA/s | 1.0.6, W | 1.0.6, MA/W | kernel |
+|---|---|---|---|---|---|---|
+| RTX 3070 (core lock 1650 MHz, power limit 200 W) | Kepler | 16.1-16.5 | 19.33 | 160 | 0.121 | warp |
+| RTX 3070 (core lock 1650 MHz, power limit 200 W) | TESS | 20.17 | 25.93 | 172 | 0.151 | warp |
+| RTX 4070 Laptop GPU (hot, 86 C, ~45-50 W) | Kepler | 29.7 | 32.7 | ~51 | 0.64 | warp |
+| RTX 4070 Laptop GPU (hot, 86 C, ~45-50 W) | TESS | 26.2 | 30.1 | ~45 | 0.67 | warp |
+
+RTX 3070: 1.0.5 (engine 0.2.9) measured both kernels once, on the first model of a slot, and kept dp4a or warp for good; on the
+chain's models of today both read every row and the card is limited by its memory. 1.0.6 skips the zero rows and picks warp on
+both slots. RTX 4070 Laptop GPU: the 1.0.5 column is engine 0.3.0 with the zero rows read (`NEBGPU_DEADSKIP=0`, the same kernels
+as 0.2.9). RTX 40 desktop and RTX 50 cards were not measured by us with 0.3.0 yet.
 
 **GPU engine 0.2.9 (ffgn 1.0.5): both KEP1 kernels**, engine benchmark, the same conditions for both, measured 19.11.2026:
 
