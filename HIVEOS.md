@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.6 on HiveOS
+# FreeForGemNeb (ffgn) 1.0.7 on HiveOS
 
 [English](#english) · [Русский](#русский)
 
@@ -32,7 +32,7 @@ the NEB **main** network. Pools are described in MANUAL section 9, the node and 
 2. **Flight Sheets**, **Import from Clipboard**, paste:
 
 ```json
-{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/ffgn-hive-1.0.6.tar.gz","user_config":""},"pool_geo":[]}]}
+{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.7/ffgn-hive-1.0.7.tar.gz","user_config":""},"pool_geo":[]}]}
 ```
 
 3. Pick your `NEB` wallet in the red-marked field (the import carries no wallet), **Create flight sheet**, apply it to the rig.
@@ -46,7 +46,7 @@ Coin `NEB`, Wallet: yours, Pool: *Configure in miner*, Miner: **Custom**, *Setup
 | Field | Value |
 |---|---|
 | Miner name | `ffgn-hive` (filled in automatically from the URL) |
-| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/ffgn-hive-1.0.6.tar.gz` |
+| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.7/ffgn-hive-1.0.7.tar.gz` |
 | Hash algorithm | `nebhash` |
 | Wallet and worker template | `%WAL%.%WORKER_NAME%` |
 | Pool URL | see the table above |
@@ -131,7 +131,7 @@ TLS: `stratum+ssl://HOST:PORT`, где пул его предлагает. Пр�
 2. **Flight Sheets**, **Import from Clipboard**, вставьте:
 
 ```json
-{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/ffgn-hive-1.0.6.tar.gz","user_config":""},"pool_geo":[]}]}
+{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.7/ffgn-hive-1.0.7.tar.gz","user_config":""},"pool_geo":[]}]}
 ```
 
 3. Выберите кошелёк `NEB` в поле, отмеченном красным (импорт кошелёк не переносит), **Create flight sheet**, примените к ригу.
@@ -145,7 +145,7 @@ Coin `NEB`, Wallet: ваш, Pool: *Configure in miner*, Miner: **Custom**, *Setu
 | Поле | Значение |
 |---|---|
 | Miner name | `ffgn-hive` (заполняется автоматически из URL) |
-| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/ffgn-hive-1.0.6.tar.gz` |
+| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.7/ffgn-hive-1.0.7.tar.gz` |
 | Hash algorithm | `nebhash` |
 | Wallet and worker template | `%WAL%.%WORKER_NAME%` |
 | Pool URL | см. таблицу выше |

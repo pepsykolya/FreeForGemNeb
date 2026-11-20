@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.6 — manual for beginners
+# FreeForGemNeb (ffgn) 1.0.7 — manual for beginners
 
 This guide takes you from zero to a running **NEB** miner: a wallet, the miner on Windows, HiveOS or Linux, and the two ways
 to mine (through a pool, or solo through your own node). Русская версия — [MANUAL.ru.md](MANUAL.ru.md). HiveOS in detail:
@@ -534,6 +534,30 @@ can still be noisy; the miner's efficiency number is an average.
 
 Million attempts per second (MA/s) and million attempts per second per watt (MA/W), the real dataset, memory at its stock
 clock, no undervolt. On the main network every block is KEP1 (slot 0 Kepler, slot 1 TESS: two datasets of different size).
+
+**GPU engine 0.4.0 (ffgn 1.0.7)**, engine benchmark on the chain's trained models (20.11.2026, auto kernel choice):
+
+| GPU | slot | 1.0.6, MA/s | 1.0.7, MA/s |
+|---|---|---:|---:|
+| RTX 3070 | Kepler | 19.33 | 31.42 |
+| RTX 3070 | TESS | 25.93 | 37.92 |
+| RTX 4070 Laptop GPU (hot, two 8 s rounds) | Kepler | — | 36.02-38.00 |
+| RTX 4070 Laptop GPU (hot, two 8 s rounds) | TESS | — | 35.34-38.28 |
+
+The RTX 3070 comparison uses nearby core locks (1650 MHz for 1.0.6, 1680 MHz for 1.0.7) and a 200 W limit. RTX 4070 Laptop
+GPU power varied with temperature, so no efficiency claim is made from that A/B. RTX 40 desktop and RTX 50 cards were not
+measured by us with 0.4.0 yet.
+
+TESS on RTX 3070, engine 0.4.0 clock sweep:
+
+| Core lock | Speed | Mean power | Efficiency |
+|---|---:|---:|---:|
+| **1680 MHz (best measured efficiency)** | 36.81 MA/s | 135.7 W | **0.271 MA/W** |
+| 1750 MHz | 38.33 MA/s | 148.2 W | 0.259 MA/W |
+| 1800 MHz | 39.27 MA/s | 157.2 W | 0.250 MA/W |
+| **1850 MHz (maximum measured speed)** | **40.49 MA/s** | 170.4 W | 0.238 MA/W |
+
+These are measurements, not a recommendation to raise your clocks. Auto-lock, auto-uv and existing OC settings are unchanged.
 
 **GPU engine 0.3.0 (ffgn 1.0.6)**, engine benchmark on the chain's trained models (19.11.2026, 8 s x 2 rounds, auto choice):
 

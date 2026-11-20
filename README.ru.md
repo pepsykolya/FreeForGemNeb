@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.6
+# FreeForGemNeb (ffgn) 1.0.7
 
 Нативный GPU-майнер **NEB** (Neural Engine Byte) — монеты на proof-of-work, где попытка майнинга — один целочисленный шаг
 обучения небольшой нейросети (на основной сети — сеть KEP1 на транзитных сигналах Kepler в обоих слотах датасета). Видеокарты NVIDIA; пакеты для HiveOS, Windows и Linux. Комиссия разработчика **1 %**.
@@ -12,6 +12,8 @@ English version — [README.md](README.md).
   фиксация частот, ограничение температуры для ноутбуков, режим простоя на Windows.
 - Резервные пулы с возвратом на основной, сторожа на случай, когда пул не засчитывает шары, API с метриками Prometheus, ваши
   настройки видеокарты возвращаются после любой остановки, автозапуск Windows, статистика HiveOS, уведомление о новой версии.
+
+**Что нового в 1.0.7** (рекомендуется всем). GPU-движок 0.4.0 пропускает и свёрточные чтения нулевых строк таблицы (1.0.6 пропускал только чтения большого линейного слоя), а KEP1 warp-ядро теперь использует одну попытку на warp/block. Результаты, модели, тикеты и датасет не изменились бит в бит; эталон на CPU по-прежнему перепроверяет каждую шару. На обученных моделях цепи RTX 3070 достигает 31,4 MA/s Kepler и 37,9 MA/s TESS (примерно +63 % и +46 % к 1.0.6). TESS достигает 40,49 MA/s при локе 1850 МГц; лучшая измеренная эффективность в sweep — при 1680 МГц, а не в режиме максимальной скорости. Одна попытка на warp оказалась быстрее прежнего варианта и на RTX 4070 Laptop GPU.
 
 **Что нового в 1.0.6** (рекомендуется всем). GPU-движок 0.3.0: на обученных моделях цепи у многих сэмплов выход уже равен цели (ошибка 0), и их строки таблицы — сплошные нули; оба ядра KEP1 их больше не читают. Результаты те же бит в бит (тестовые векторы NEB, эталон на CPU для каждой шары). Ядро KEP1 (dp4a или warp) теперь выбирается заново на каждой новой модели — замером на её первых запусках майнинга (оба ядра дают одинаковый результат, ни одна попытка не теряется); строка лога `GPU0: KEP1 kernel ...` появляется, когда выбор меняется, поле API `kep1_kernel` показывает последний. Замеры (бенчмарк движка, модели цепи): RTX 3070 при локе 1650 МГц и лимите 200 Вт — Kepler 16,5 → 19,3 MA/s (+17 %), TESS 20,2 → 25,9 MA/s (+29 %), теперь она майнит ядром warp на обоих слотах; RTX 4070 Laptop GPU — от +8 до +15 %.
 
@@ -31,14 +33,14 @@ NEB 1.0.0 до старта: новый genesis id, новый файл дата
 
 ## Скачать
 
-Страница релиза: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.6
+Страница релиза: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.7
 
 | пакет | файл |
 |---|---|
-| HiveOS (кастомный майнер `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/ffgn-hive-1.0.6.tar.gz |
-| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/ffgn-1.0.6-linux-x86_64.tar.gz |
-| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/ffgn-1.0.6-windows-x64.zip |
-| контрольные суммы | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/SHA256SUMS |
+| HiveOS (кастомный майнер `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.7/ffgn-hive-1.0.7.tar.gz |
+| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.7/ffgn-1.0.7-linux-x86_64.tar.gz |
+| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.7/ffgn-1.0.7-windows-x64.zip |
+| контрольные суммы | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.7/SHA256SUMS |
 
 Бинарник майнера — `ffgn` (`ffgn.exe` на Windows). Файл датасета основной сети NEB (`neb-datasets.bin`, около 16 МБ) лежит внутри
 каждого пакета.
@@ -47,6 +49,30 @@ NEB 1.0.0 до старта: новый genesis id, новый файл дата
 
 Миллионы попыток в секунду (MA/s) и миллионы попыток в секунду на ватт (MA/W), настоящий датасет, память на стоковой
 частоте, без андервольта. На основной сети каждый блок — KEP1 (слот 0 Kepler, слот 1 TESS: два датасета разного размера).
+
+**GPU-движок 0.4.0 (ffgn 1.0.7)**, бенчмарк движка на обученных моделях цепи (20.11.2026, автовыбор ядра):
+
+| Карта | слот | 1.0.6, MA/s | 1.0.7, MA/s |
+|---|---|---:|---:|
+| RTX 3070 | Kepler | 19.33 | 31.42 |
+| RTX 3070 | TESS | 25.93 | 37.92 |
+| RTX 4070 Laptop GPU (горячая, два круга по 8 с) | Kepler | — | 36.02–38.00 |
+| RTX 4070 Laptop GPU (горячая, два круга по 8 с) | TESS | — | 35.34–38.28 |
+
+Сравнение на RTX 3070 использует близкие локи ядра (1650 МГц у 1.0.6, 1680 МГц у 1.0.7) и лимит 200 Вт. Мощность RTX 4070
+Laptop GPU менялась с температурой, поэтому вывод об эффективности по этому A/B не делаем. Настольные RTX 40 и RTX 50 с
+движком 0.4.0 мы ещё не мерили.
+
+TESS на RTX 3070, sweep частоты движка 0.4.0:
+
+| Лок ядра | Скорость | Средняя мощность | Эффективность |
+|---|---:|---:|---:|
+| **1680 МГц (лучшая измеренная эффективность)** | 36.81 MA/s | 135.7 Вт | **0.271 MA/W** |
+| 1750 МГц | 38.33 MA/s | 148.2 Вт | 0.259 MA/W |
+| 1800 МГц | 39.27 MA/s | 157.2 Вт | 0.250 MA/W |
+| **1850 МГц (максимальная измеренная скорость)** | **40.49 MA/s** | 170.4 Вт | 0.238 MA/W |
+
+Это замеры, а не рекомендация повышать частоты. Auto-lock, auto-uv и текущие настройки OC не меняются.
 
 **GPU-движок 0.3.0 (ffgn 1.0.6)**, бенчмарк движка на обученных моделях цепи (19.11.2026, 8 с × 2 круга, автовыбор ядра):
 
@@ -121,7 +147,7 @@ Pearl) замедляет NEB примерно в 10 раз; ffgn на врем�
 3. Linux:
    `./ffgn --pool neb.ariabrain.com:3370 --wallet neb1ВАШАДРЕС --worker rig1`
 4. HiveOS: кастомный майнер `ffgn-hive`, Installation URL
-   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.6/ffgn-hive-1.0.6.tar.gz`, алгоритм `nebhash`, шаблон
+   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.7/ffgn-hive-1.0.7.tar.gz`, алгоритм `nebhash`, шаблон
    кошелька `%WAL%.%WORKER_NAME%`, Pool URL `neb.ariabrain.com:3370`.
 5. Соло через свою ноду: `neb-node --run --dataset neb-datasets.bin --datadir data --miner-lock "$(neb-wallet --wallet wallet.txt lock)"`
    и `ffgn --node 127.0.0.1:3441` на том же компьютере (подробности в руководстве).
