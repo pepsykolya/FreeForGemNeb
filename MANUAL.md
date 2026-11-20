@@ -553,6 +553,8 @@ limit and move the speed more than the difference, so no gain is claimed for it.
 
 These are measurements, not a recommendation to change your clocks. Auto-lock, auto-uv and existing OC settings are unchanged.
 
+**Stability note (added 20.11.2026):** in a later long live run on the same RTX 3070, a fixed V/F offset of +240 at 1620 MHz was not stable while mining the Kepler slot with the sorted attempt order (bad results caught by the miner's checks, then a GPU fault); +240 at 1560 MHz and +210 were stable. The best offset differs from card to card: use `--auto-uv`, which checks every step against the CPU reference and steps back after a failure, instead of copying an offset.
+
 **Live mining with 1.0.8, core lock sweep** (20.11.2026, RTX 3070, 200 W limit; measured on one card, 3.5 min per point;
 per slot: the mean of the miner's 10 s rate lines while that slot was mined, power = mean of nvidia-smi on that slot):
 
