@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.7 — manual for beginners
+# FreeForGemNeb (ffgn) 1.0.8 — manual for beginners
 
 This guide takes you from zero to a running **NEB** miner: a wallet, the miner on Windows, HiveOS or Linux, and the two ways
 to mine (through a pool, or solo through your own node). Русская версия — [MANUAL.ru.md](MANUAL.ru.md). HiveOS in detail:
@@ -534,6 +534,24 @@ can still be noisy; the miner's efficiency number is an average.
 
 Million attempts per second (MA/s) and million attempts per second per watt (MA/W), the real dataset, memory at its stock
 clock, no undervolt. On the main network every block is KEP1 (slot 0 Kepler, slot 1 TESS: two datasets of different size).
+
+**GPU engine 0.5.1 (ffgn 1.0.8)**, engine benchmark on the chain's trained models (20.11.2026, RTX 3070, 200 W limit,
+0.4.0 and 0.5.1 measured in the same session, power = mean under full load, automatic sort choice):
+
+| Core lock / offset | slot | 0.4.0 (1.0.7) | 0.5.1 (1.0.8) | change |
+|---|---|---:|---:|---:|
+| 1680 MHz / +210 | Kepler | 31.37 MA/s, 164.7 W, 0.1905 MA/W | **38.22 MA/s**, 185.2 W, **0.2064 MA/W** | +21.8 % speed, +8.4 % MA/W |
+| 1680 MHz / +210 | TESS | 36.81 MA/s, 149.5 W, 0.2463 MA/W | **41.67 MA/s**, 165.1 W, **0.2524 MA/W** | +13.2 % speed, +2.5 % MA/W |
+| 1620 MHz / +240 | Kepler | 30.73 MA/s, 152.0 W, 0.2022 MA/W | **37.23 MA/s**, 168.1 W, **0.2215 MA/W** | +21.2 % speed, +9.5 % MA/W |
+| 1620 MHz / +240 | TESS | 35.49 MA/s, 137.5 W, 0.2581 MA/W | **40.20 MA/s**, 146.1 W, **0.2752 MA/W** | +13.3 % speed, +6.6 % MA/W |
+
+The best measured efficiency of 0.5.1 on this card is at 1620 MHz / +240: Kepler 0.2215 MA/W and TESS 0.2752 MA/W, +16.3 %
+and +11.7 % over 0.4.0 at 1680 MHz / +210, and still faster than 0.4.0 there. The power rises with the speed (the GPU waits
+less between kernels), so the per-watt gain is smaller than the speed gain. On RTX 4070 Laptop GPU (32 MB L2 cache, both
+tables fit in it, the engine does not sort) there is no clear change in speed or efficiency: its clocks follow its thermal
+limit and move the speed more than the difference, so no gain is claimed for it. RTX 40 desktop and RTX 50 cards were not measured by us with 0.5.1 yet.
+
+These are measurements, not a recommendation to change your clocks. Auto-lock, auto-uv and existing OC settings are unchanged.
 
 **GPU engine 0.4.0 (ffgn 1.0.7)**, engine benchmark on the chain's trained models (20.11.2026, auto kernel choice):
 
