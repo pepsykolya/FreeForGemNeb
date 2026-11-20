@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.8 — manual for beginners
+# FreeForGemNeb (ffgn) 1.0.9 — manual for beginners
 
 This guide takes you from zero to a running **NEB** miner: a wallet, the miner on Windows, HiveOS or Linux, and the two ways
 to mine (through a pool, or solo through your own node). Русская версия — [MANUAL.ru.md](MANUAL.ru.md). HiveOS in detail:
@@ -534,6 +534,37 @@ can still be noisy; the miner's efficiency number is an average.
 
 Million attempts per second (MA/s) and million attempts per second per watt (MA/W), the real dataset, memory at its stock
 clock, no undervolt. On the main network every block is KEP1 (slot 0 Kepler, slot 1 TESS: two datasets of different size).
+
+**GPU engine 0.6.0 (ffgn 1.0.9)**, measured 21.11.2026 (power = mean of the GPU's own readings under load; MA/s = evaluated
+attempts). The rate of the new paths is proportional to the share of a model's attempts with at most two live rows, so it moves
+with the chain's model: the share was 1.25-1.68 % for the Kepler models and 7.6-8.2 % for the TESS models during the live runs.
+
+Live mining on one pool, RTX 3070, 1680 MHz / +210 / 200 W limit (1.0.8: the live lock sweep of 20.11.2026; 1.0.9: 20 min,
+11 models, 61 shares accepted, 0 rejected, 0 bad):
+
+| Slot | 1.0.8 (engine 0.5.1) | 1.0.9 (engine 0.6.0) | Change |
+|---|---:|---:|---:|
+| Kepler | 40.05 MA/s, 184.4 W, 0.2172 MA/W | **65.8-83.1 MA/s**, 110-113 W, **0.59-0.74 MA/W** | x1.6-2.1 speed, x2.7-3.4 MA/W |
+| TESS | 40.21 MA/s, 162.5 W, 0.2474 MA/W | **343-358 MA/s**, 115-116 W, **2.98-3.09 MA/W** | x8.5-8.9 speed, x12 MA/W |
+
+Engine benchmark on three recorded live models (one process per model, automatic path, 20 s after the choice):
+
+| Card, core lock | Model (share of attempts with <= 2 live rows) | 1.0.8 path | 1.0.9 (digest table chosen) | MA/W change |
+|---|---|---:|---:|---:|
+| RTX 3070, 1680 MHz / +210 | Kepler (1.12 %) | — | **55.64 MA/s**, 111.0 W, **0.501 MA/W** | |
+| RTX 3070, 1680 MHz / +210 | Kepler (1.56 %) | — | **76.81 MA/s**, 111.2 W, **0.691 MA/W** | |
+| RTX 3070, 1680 MHz / +210 | TESS (3.92 %) | — | **184.32 MA/s**, 112.7 W, **1.636 MA/W** | |
+| CMP 50HX (Turing), 1500 MHz | Kepler (1.12 %) | 18.60 MA/s, 154.4 W, 0.1205 MA/W | **59.80 MA/s**, 132.1 W, **0.453 MA/W** | x3.8 |
+| CMP 50HX (Turing), 1500 MHz | Kepler (1.56 %) | 18.67 MA/s, 152.6 W, 0.1223 MA/W | **82.25 MA/s**, 133.1 W, **0.618 MA/W** | x5.1 |
+| CMP 50HX (Turing), 1500 MHz | TESS (3.92 %) | 18.73 MA/s, 135.4 W, 0.1383 MA/W | **196.85 MA/s**, 135.2 W, **1.455 MA/W** | x10.5 |
+
+(The CMP 50HX 1.0.8 numbers were measured on the same card and lock on 20.11.2026.) Live mining on a rig of five CMP 50HX at a
+1300 MHz core lock (the best per-watt lock of the table path we measured on this card), 20 min, 5 models: Kepler 58.3-65.4 MA/s
+per card at 109-119 W (0.49-0.59 MA/W), TESS 343.8-346.2 MA/s per card at 116-127 W (2.71-3.00 MA/W); 80 shares found, 79
+accepted, 1 stale ("job not found" after a 1.5-s job), 0 bad. RTX 40 / 50 cards take the same paths; we did not measure a
+desktop RTX 40 / 50 with 0.6.0, and the RTX 4070 Laptop GPU's speed follows its thermal limit, so no figure is claimed for them.
+
+These are measurements, not a recommendation to change your clocks. Auto-lock, auto-uv and existing OC settings are unchanged.
 
 **GPU engine 0.5.1 (ffgn 1.0.8)**, engine benchmark on the chain's trained models (20.11.2026, RTX 3070, 200 W limit,
 0.4.0 and 0.5.1 measured in the same session, power = mean under full load, automatic sort choice):
