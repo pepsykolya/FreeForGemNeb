@@ -553,6 +553,23 @@ limit and move the speed more than the difference, so no gain is claimed for it.
 
 These are measurements, not a recommendation to change your clocks. Auto-lock, auto-uv and existing OC settings are unchanged.
 
+**Live mining with 1.0.8, core lock sweep** (20.11.2026, RTX 3070, 200 W limit; measured on one card, 3.5 min per point;
+per slot: the mean of the miner's 10 s rate lines while that slot was mined, power = mean of nvidia-smi on that slot):
+
+| Core lock / offset | Kepler MA/s | W | MA/W | TESS MA/s | W | MA/W |
+|---|---:|---:|---:|---:|---:|---:|
+| 1500 MHz / +210 | 36.00 | 146.3 | **0.2460** | 35.92 | 130.2 | **0.2760** |
+| 1560 MHz / +210 | 37.44 | 161.4 | 0.2320 | 36.87 \* | 142.2 | 0.2593 |
+| 1620 MHz / +240 | 38.84 | 169.5 | 0.2291 | 38.55 \* | 146.0 | 0.2641 |
+| 1680 MHz / +210 | 40.05 | 184.4 | 0.2172 | 40.21 \* | 162.5 | 0.2474 |
+| 1680 MHz / +240 | 40.13 \* | 182.1 | 0.2204 | 40.31 | 158.6 | 0.2542 |
+| 1740 MHz / +210 | 41.29 | 199.6 | 0.2069 | 41.48 \* | 178.2 | 0.2328 |
+
+\* only 1-3 rate lines on that slot in the window. At 1740 MHz Kepler reached the 200 W limit and the clock fell to
+1710-1731 MHz. Every point ran stable with no errors. The best measured efficiency is at the lower lock: 1500 MHz / +210
+(Kepler 0.2460, TESS 0.2760 MA/W), about 13 % more MA/W on Kepler than 1680 MHz / +210 at about 10 % less speed.
+This is one card and short windows, not a recommendation: the miner's settings (auto-lock, auto-uv, OC) are unchanged.
+
 **GPU engine 0.4.0 (ffgn 1.0.7)**, engine benchmark on the chain's trained models (20.11.2026, auto kernel choice):
 
 | GPU | slot | 1.0.6, MA/s | 1.0.7, MA/s |
