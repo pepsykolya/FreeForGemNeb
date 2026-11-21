@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.10 — manual for beginners
+# FreeForGemNeb (ffgn) 1.0.11 — manual for beginners
 
 This guide takes you from zero to a running **NEB** miner: a wallet, the miner on Windows, HiveOS or Linux, and the two ways
 to mine (through a pool, or solo through your own node). Русская версия — [MANUAL.ru.md](MANUAL.ru.md). HiveOS in detail:
@@ -385,6 +385,8 @@ GPU in `--devices` order (`-` = leave that GPU alone).
 | `--lock-mclock N` | lock the memory clock to N MHz |
 | `--keep-hive-mem` | keep a HiveOS OC profile memory lock below the card's maximum (by default ffgn replaces it with the maximum while mining, see section 13) |
 | `--moffset N` | memory clock offset in MHz, may be negative (driver 555 or newer) |
+| `--table-mclock N` | NEB: lock the memory to N MHz (e.g. 810) only while a GPU mines on the pure digest-table path; the full memory clock comes back by itself for every table build, the L=3 path and every other path (same list syntax as `--lock-mclock`; root / Administrator) |
+| `--single-process` | run every GPU's engine in the miner process (before 1.0.11); default: one engine process per GPU, so a fault on one GPU restarts only that GPU |
 | `--temp-limit C[,C]` | keep the GPU at or below C degrees (40..100); a duty-cycle controller, for laptops |
 | `--temp-stop C2[,C2]` | hard stop at C2 until the GPU cools to the limit minus 6 (default limit + 10) |
 
@@ -536,6 +538,34 @@ can still be noisy; the miner's efficiency number is an average.
 
 Million attempts per second (MA/s) and million attempts per second per watt (MA/W), the real dataset, memory at its stock
 clock, no undervolt. On the main network every block is KEP1 (slot 0 Kepler, slot 1 TESS: two datasets of different size).
+
+**GPU engine 0.7.0 (ffgn 1.0.11)**, measured 21.11.2026 (power = mean of the GPU's own readings under load; MA/s = evaluated
+attempts). P = the model's share of attempts with at most two live rows.
+
+Automatic L=3 on low-P Kepler models (engine benchmark, same recorded models, one process; table alone against the path the
+engine chooses):
+
+| Card, core lock | Model (P) | Table alone | 1.0.11 (table + L=3) | Rate | MA/W |
+|---|---|---:|---:|---:|---:|
+| RTX 3070, 1680 MHz / +210 / 200 W | live Kepler (0.73 %) | 47.0 MA/s, 127.4 W, 0.369 MA/W | **60.0 MA/s**, 137.5 W, **0.436 MA/W** | +28 % | +18 % |
+| RTX 3070, 1680 MHz / +210 / 200 W | Kepler (0.65 %) | 42.3 MA/s, 130.6 W, 0.324 MA/W | **60.0 MA/s**, 138.3 W, **0.434 MA/W** | +42 % | +34 % |
+| CMP 50HX (Turing), 1500 MHz | live Kepler (0.73 %) | 47.5 MA/s, 141.3 W, 0.336 MA/W | **54.3 MA/s** (L=3 at 14k-20k: 137-143 W, 0.381-0.387 MA/W) | +15 % | +13 to +15 % |
+| CMP 50HX (Turing), 1500 MHz | Kepler (0.65 %) | 42.7 MA/s, 142.0 W, 0.301 MA/W | **54.3-55.0 MA/s**, 139.5-143.2 W, 0.384-0.390 MA/W | +27 to +29 % | +28 to +29 % |
+
+On models with P 1.56 % (Kepler) and 3.92 % (TESS) the L=3 path is slower (x0.76 / x0.49 on the CMP 50HX), so the engine keeps it
+off above 1.3 %. Live Kepler models of the last hours had P 0.62-2.25 %.
+
+Digest-table build, full build of one model (byte-identical tables): RTX 3070 Kepler 1003-1192 ms -> 311-341 ms, TESS 227 -> 61 ms;
+CMP 50HX Kepler 892-1063 ms -> 287-316 ms, TESS 196 -> 47 ms. Screener on RTX 30 / 40 (RTX 3070, interleaved, 3 x 15 s): Kepler
++1.0 % rate (+1.0 to +1.5 % per watt), TESS +2.25 % (+1.0 %).
+
+`--table-mclock 810` on the pure table path (RTX 3070, engine benchmark, same minutes): rate -0.4 to -0.6 %, power 131 -> 121 W,
+MA/W +7.9 % (Kepler) and +10.2 % (TESS). At 810 MHz every path that reads the memory is several times slower, which is why the
+miner gives the full memory clock back for builds and for every other path.
+
+Live on one RTX 3070 (1680 MHz / +210 / 200 W, same pool), 1.0.10 (46 min) against 1.0.11 with `--table-mclock 810` (47 min), Kepler blocks: screened nonces 6.31 -> 6.45 G/s (+2.1 %), power 132.2 -> 120.7 W, screened nonces per watt +11.8 %. The chain served no Kepler model below 1.3 % in these minutes, so the automatic L=3 stayed off, as it should; the TESS blocks were too short for a figure. 1.0.11: 150 shares found, 0 bad, at the pool 132 accepted and 2 stale, no Xid.
+
+These are measurements, not a recommendation to change your clocks. Auto-lock and existing OC settings are unchanged.
 
 **GPU engine 0.6.1 (ffgn 1.0.10)**, measured 21.11.2026 (power = mean of the GPU's own readings under load; MA/s = evaluated
 attempts, G/s = screened nonces). On the table path the evaluated rate = screened nonces x the model's share of attempts with at
@@ -838,7 +868,7 @@ The fee address (public, so you can check it on the pools):
 | HiveOS does not start the miner | The Installation URL of the right release; algorithm `nebhash`; wallet template `%WAL%.%WORKER_NAME%`; read `miner log`. |
 | Windows: clocks / undervolt not applied | Start the `.bat` with Run as administrator. |
 | Antivirus warning | Mining software is often flagged. Compare the SHA-256 with `SHA256SUMS`, then add an exclusion if you decide to trust it. |
-| All GPUs of a rig restart together | All GPUs run in one miner process, so a fault on one GPU (usually an overclock or undervolt too far for that card) restarts the miner on every GPU; it recovers by itself in about a minute. The log names the GPU with the driver fault: lower that card's offset or use `--auto-uv`. |
+| One GPU restarts by itself (`FAILED in its own engine process`) | Since 1.0.11 each GPU runs in its own engine process: a fault on one GPU (usually an overclock or undervolt too far for that card) restarts only that GPU in about 5-10 s, the others keep mining. The log names the GPU with the driver fault: lower that card's offset or use `--auto-uv`. With `--single-process` (or before 1.0.11) a fault restarts the miner on every GPU. |
 
 Questions and bug reports: https://github.com/pepsykolya/FreeForGemNeb/issues, Telegram channel
 [@freeforgem](https://t.me/freeforgem) and chat [@freeforgem_chat](https://t.me/freeforgem_chat). Please include the version
