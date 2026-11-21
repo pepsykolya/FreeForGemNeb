@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.9 on HiveOS
+# FreeForGemNeb (ffgn) 1.0.10 on HiveOS
 
 [English](#english) · [Русский](#русский)
 
@@ -32,7 +32,7 @@ the NEB **main** network. Pools are described in MANUAL section 9, the node and 
 2. **Flight Sheets**, **Import from Clipboard**, paste:
 
 ```json
-{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.9/ffgn-hive-1.0.9.tar.gz","user_config":""},"pool_geo":[]}]}
+{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.10/ffgn-hive-1.0.10.tar.gz","user_config":""},"pool_geo":[]}]}
 ```
 
 3. Pick your `NEB` wallet in the red-marked field (the import carries no wallet), **Create flight sheet**, apply it to the rig.
@@ -46,7 +46,7 @@ Coin `NEB`, Wallet: yours, Pool: *Configure in miner*, Miner: **Custom**, *Setup
 | Field | Value |
 |---|---|
 | Miner name | `ffgn-hive` (filled in automatically from the URL) |
-| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.9/ffgn-hive-1.0.9.tar.gz` |
+| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.10/ffgn-hive-1.0.10.tar.gz` |
 | Hash algorithm | `nebhash` |
 | Wallet and worker template | `%WAL%.%WORKER_NAME%` |
 | Pool URL | see the table above |
@@ -56,7 +56,7 @@ Coin `NEB`, Wallet: yours, Pool: *Configure in miner*, Miner: **Custom**, *Setup
 **Rigs with many GPUs on a weak CPU** (2-4 CPU threads, a few GB of RAM, e.g. 8-12 cards on a Pentium / Celeron): ffgn 1.0.5
 tunes `--auto-uv` one GPU at a time on rigs of 6+ GPUs and grows to 2 and 4 only while the rig stays healthy (the others
 mine); give `--uv-parallel 1` in Extra config to keep it at one. A rig that restarted twice within an hour during a tuning
-pauses auto-uv (`AUTO-UV PAUSED` in the version column) until `--uv-unpause` is given once. The GPUs return to full load one by one after a pause (`--ramp-ms 500` by default on 4+ GPUs; more, e.g. `--ramp-ms 1000`,
+pauses auto-uv (`AUTO-UV PAUSED` in the version column) until `--uv-unpause` is given once. Since 1.0.10 auto-uv tunes while the cards mine (each card keeps its MA/s and shares), all GPUs at once; the limits above apply to the old check process, used only for a card that does not mine within 240 s or with `FFGN_UV_CHILD=1`. The GPUs return to full load one by one after a pause (`--ramp-ms 500` by default on 4+ GPUs; more, e.g. `--ramp-ms 1000`,
 for a weak PSU or risers). A line `all N GPUs stalled at once ... likely a PCIe bus / power event` in the log points at risers,
 cables or the PSU (`dmesg | grep -i xid`: Xid 79).
 
@@ -131,7 +131,7 @@ TLS: `stratum+ssl://HOST:PORT`, где пул его предлагает. Пр�
 2. **Flight Sheets**, **Import from Clipboard**, вставьте:
 
 ```json
-{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.9/ffgn-hive-1.0.9.tar.gz","user_config":""},"pool_geo":[]}]}
+{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.10/ffgn-hive-1.0.10.tar.gz","user_config":""},"pool_geo":[]}]}
 ```
 
 3. Выберите кошелёк `NEB` в поле, отмеченном красным (импорт кошелёк не переносит), **Create flight sheet**, примените к ригу.
@@ -145,7 +145,7 @@ Coin `NEB`, Wallet: ваш, Pool: *Configure in miner*, Miner: **Custom**, *Setu
 | Поле | Значение |
 |---|---|
 | Miner name | `ffgn-hive` (заполняется автоматически из URL) |
-| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.9/ffgn-hive-1.0.9.tar.gz` |
+| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.10/ffgn-hive-1.0.10.tar.gz` |
 | Hash algorithm | `nebhash` |
 | Wallet and worker template | `%WAL%.%WORKER_NAME%` |
 | Pool URL | см. таблицу выше |
@@ -155,7 +155,7 @@ Coin `NEB`, Wallet: ваш, Pool: *Configure in miner*, Miner: **Custom**, *Setu
 **Риги с множеством карт на слабом CPU** (2–4 потока CPU, несколько ГБ RAM, например 8–12 карт на Pentium / Celeron): ffgn 1.0.5
 подбирает `--auto-uv` по одной карте на ригах от 6 карт и увеличивает до 2 и 4, только пока риг здоров (остальные майнят);
 `--uv-parallel 1` в Extra config оставит по одной. Риг, дважды за час перезапустившийся во время подбора, ставит auto-uv на
-паузу (`AUTO-UV PAUSED` в колонке версии) до однократного `--uv-unpause`.
+паузу (`AUTO-UV PAUSED` в колонке версии) до однократного `--uv-unpause`. С 1.0.10 auto-uv подбирает, пока карты майнят (каждая карта сохраняет MA/s и шары), все карты одновременно; ограничения выше относятся к прежнему проверочному процессу, который используется только для карты, не начавшей майнить за 240 с, или при `FFGN_UV_CHILD=1`.
 После паузы карты выходят на полную нагрузку по одной (`--ramp-ms 500` по умолчанию на 4+ картах; при слабом блоке питания или
 райзерах — больше, например `--ramp-ms 1000`). Строка `all N GPUs stalled at once ... likely a PCIe bus / power event` в логе
 указывает на райзеры, кабели или блок питания (`dmesg | grep -i xid`: Xid 79).

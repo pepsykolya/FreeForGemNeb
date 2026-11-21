@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.9
+# FreeForGemNeb (ffgn) 1.0.10
 
 Native GPU miner for **NEB** (Neural Engine Byte), a proof-of-work coin whose mining attempt is one integer training step of a
 small neural network (on the main network, the Kepler transit-signal network KEP1 in both dataset slots).
@@ -11,6 +11,8 @@ NVIDIA GPUs; HiveOS, Windows and Linux packages. Dev fee **1%**. Русская 
   GPU by measurement, clock locks, temperature limit for laptops, idle mode on Windows.
 - Pool failover with the return to the primary pool, watchdogs for pools without credited shares, API with Prometheus
   metrics, your GPU settings put back after every kind of stop, Windows autostart, HiveOS stats, a notice when a new version is out.
+
+**What changed in 1.0.10** (recommended for everyone; faster on RTX 20 / GTX 16 / CMP Turing cards and on RTX 30). GPU engine 0.6.1 has a faster nonce screen on the digest-table path (the step that picks out the attempts with at most two live rows before they are looked up in the model's table). It is on by default on every card that takes the table path (CC 7.5 and newer: RTX 20 / GTX 16 / CMP Turing, RTX 30 / 40 / 50); GTX 10 and Volta keep the full path as before. Everything else is as in 1.0.9: the engine still chooses the path for every model by measurement, results, tickets, models and the dataset are unchanged bit for bit and the CPU reference still re-checks every share. Engine benchmark on the same recorded live models (1.0.9 engine vs 1.0.10 engine in one process): RTX 3070 at 1680 MHz / +210 / 200 W +28.5 to +28.9 % rate and +8.6 to +11.5 % per watt; CMP 50HX (Turing) at a 1300 MHz core lock +15 to +21 % rate and +10 to +14 % per watt. Live mining on the same RTX 3070: +25 % (Kepler) and +27 % (TESS) screened nonces per second, +4.8 % and +7.6 % per watt; five CMP 50HX at 1300 MHz: +13 % (Kepler) and +3 % (TESS), +6.1 % and +1.6 % per watt. The faster screen keeps the GPU busier, so the card draws more power (about +17 % on the RTX 3070 in the benchmark) and the gain per watt is smaller than the gain in rate. **auto-uv tunes while mining.** A card under `--auto-uv` now keeps mining on the path the engine chose, sends shares and counts its MA/s while its steps are measured (in 1.0.9 a card under tuning stood at 0 MA/s for its whole tuning). All GPUs are tuned at once. Each step's power is compared with the best offset so far on the same model and path, and a step ends as soon as the difference is clear. Measured on an RTX 3070: a fresh tuning took 120 s including one fault and an automatic restart of the miner (about 17 s per step); a start from a saved profile needs one 17-s check. The card ended at +240 with 124-126 W against 129-130 W at a fixed +210, at the same rate (about -3 %). A hard Xid at the edge costs one self-restart of the miner of about 10 s. A whole rig tunes in roughly 2-5 min, all cards in parallel (estimate). The rules are unchanged: climb while every step lowers the power by more than 0.5 W, resume 2 steps below a failure. Tuning lines in the log are yellow, failures and roll-backs orange. `FFGN_UV_CHILD=1` brings back the old separate check process. **Note:** all GPUs of a rig run in one miner process, so a fault on one GPU (usually an overclock or undervolt too far for that card) restarts the miner on every GPU; it recovers by itself in about a minute. The log names the GPU with the driver fault: lower that card's offset or use `--auto-uv`. Auto-lock and your OC settings are not changed by this release.
 
 **What changed in 1.0.9** (recommended for everyone; big gains on RTX 20 / GTX 16 / CMP Turing cards and on RTX 30). GPU engine 0.6.0 chooses the fastest exact path automatically for every model of the chain. Most attempts of a model touch only a few live table rows: (1) the **digest-table path** looks up the attempts with at most two live rows in a table built for each model (about 0.2 s for TESS and 1.1 s for Kepler, often less when only part of the model changes), after a fast screen of the nonces; (2) the **cheap-attempt filter** evaluates only the attempts with at most k live rows (k = 3..6, chosen by measuring speed, and power where the card reports it). On every new model the engine measures the full path first and builds the table only when its expected rate is at least 0.8 x the measured full-path rate (the table path draws much less power); if the table is slower in practice it is turned off for that model. GTX 10 and Volta keep the full path. **The hashrate is now the number of attempts actually evaluated** (MA/s); the screened nonces are shown separately (`screened` in the stats line and the API, metric `ffgn_gpu_screened_total`). Every evaluated attempt has the same chance of a share as before; results, tickets, models and the dataset are unchanged bit for bit and the CPU reference still re-checks every share. The host sizes its scan calls by the path (larger calls on the table path) and starts the next header itself when a GPU has used one up. Measured on RTX 3070 at 1680 MHz / +210 / 200 W, live mining on one pool: Kepler 40.05 MA/s at 0.2172 MA/W (1.0.8) -> 65.8-83.1 MA/s at 0.59-0.74 MA/W (1.0.9), TESS 40.21 MA/s at 0.2474 MA/W -> 343-358 MA/s at 2.98-3.09 MA/W. On a CMP 50HX (Turing) at 1500 MHz on the same models: Kepler x3.8-x5.1 and TESS x10.5 per watt. The rate now depends on the model of the moment (see the table below). Auto-lock, auto-uv and your OC settings are not changed by this release.
 
@@ -37,14 +39,14 @@ about any income.
 
 ## Download
 
-Release page: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.9
+Release page: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.10
 
 | package | file |
 |---|---|
-| HiveOS (custom miner `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.9/ffgn-hive-1.0.9.tar.gz |
-| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.9/ffgn-1.0.9-linux-x86_64.tar.gz |
-| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.9/ffgn-1.0.9-windows-x64.zip |
-| checksums | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.9/SHA256SUMS |
+| HiveOS (custom miner `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.10/ffgn-hive-1.0.10.tar.gz |
+| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.10/ffgn-1.0.10-linux-x86_64.tar.gz |
+| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.10/ffgn-1.0.10-windows-x64.zip |
+| checksums | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.10/SHA256SUMS |
 
 The miner binary is `ffgn` (`ffgn.exe` on Windows). The dataset file of the NEB main network (`neb-datasets.bin`, about 16 MB) is
 inside every package.
@@ -53,6 +55,41 @@ inside every package.
 
 Million attempts per second (MA/s) and million attempts per second per watt (MA/W), the real dataset, memory at its stock
 clock, no undervolt. On the main network every block is KEP1 (slot 0 Kepler, slot 1 TESS: two datasets of different size).
+
+**GPU engine 0.6.1 (ffgn 1.0.10)**, measured 21.11.2026 (power = mean of the GPU's own readings under load; MA/s = evaluated
+attempts, G/s = screened nonces). On the table path the evaluated rate = screened nonces x the model's share of attempts with at
+most two live rows, so the screened rate and the screened nonces per watt compare the two versions even when the chain's model
+has changed between the runs.
+
+Engine benchmark, 1.0.9 engine (0.6.0) against 1.0.10 engine (0.6.1) on the same recorded live models, in one process with the
+same digest table (RTX 3070: 20-s segments; CMP 50HX: 12-s segments x 2 rounds):
+
+| Card, core lock | Model (share of attempts with <= 2 live rows) | 1.0.9 engine | 1.0.10 engine | Rate | MA/W |
+|---|---|---:|---:|---:|---:|
+| RTX 3070, 1680 MHz / +210 / 200 W | Kepler (1.12 %) | 4.97 G/s, 55.8 MA/s, 110.3 W, 0.506 MA/W | **6.41 G/s, 71.9 MA/s**, 127.5 W, **0.564 MA/W** | +28.9 % | +11.5 % |
+| RTX 3070, 1680 MHz / +210 / 200 W | Kepler (1.56 %) | 4.93 G/s, 77.1 MA/s, 112.0 W, 0.688 MA/W | **6.34 G/s, 99.1 MA/s**, 130.0 W, **0.762 MA/W** | +28.6 % | +10.8 % |
+| RTX 3070, 1680 MHz / +210 / 200 W | TESS (3.92 %) | 4.72 G/s, 185.3 MA/s, 113.0 W, 1.640 MA/W | **6.07 G/s, 238.2 MA/s**, 133.8 W, **1.781 MA/W** | +28.5 % | +8.6 % |
+| CMP 50HX (Turing), 1300 MHz | Kepler (1.12 %) | 4.64 G/s, 52.06 MA/s, 111.8 W, 0.466 MA/W | **5.60 G/s, 62.85 MA/s**, 118.0 W, **0.533 MA/W** | +20.7 % | +14 % |
+| CMP 50HX (Turing), 1300 MHz | TESS (3.92 %) | 4.38 G/s, 171.66 MA/s, 112.8 W, 1.522 MA/W | **5.03 G/s, 197.48 MA/s**, 117.9 W, **1.676 MA/W** | +15.0 % | +10.1 % |
+
+Live mining on one pool, screened nonces per second and per watt (the chain's models differ between the runs):
+
+| Where | Slot | 1.0.9 | 1.0.10 | Rate | Per watt |
+|---|---|---:|---:|---:|---:|
+| RTX 3070, 1680 MHz / +210 / 200 W | Kepler | 4.95 G/s at 111.4 W | **6.18 G/s** at 132.8 W | +25 % | +4.8 % |
+| RTX 3070, 1680 MHz / +210 / 200 W | TESS | 4.55 G/s at 117.5 W | **5.81 G/s** at 139.6 W | +27 % | +7.6 % |
+| 5x CMP 50HX (Turing), 1300 MHz, rig total | Kepler | 23.43 G/s at 567 W | **26.51 G/s** at 605 W | +13.1 % | +6.1 % |
+| 5x CMP 50HX (Turing), 1300 MHz, rig total | TESS | 21.09 G/s at 596 W | **21.73 G/s** at 604 W | +3.0 % | +1.6 % |
+
+RTX 3070, 1.0.10, the first 16 min: Kepler (model share 1.93 %) 186.6 MA/s at 132.8 W (1.405 MA/W), TESS (8.62 %) 428.9 MA/s at
+139.6 W (3.07 MA/W); 63 shares found, 62 accepted, 1 stale ("job not found" right after a job change), 0 bad. Five CMP 50HX,
+1.0.10, 20 min: Kepler (2.77 %) 739.4 MA/s at 605 W for the rig (1.222 MA/W), 146.2-149.5 MA/s per card; TESS (9.13 %)
+1981.5 MA/s at 604 W (3.276 MA/W), 389.5-404.1 MA/s per card; 117 shares found, 0 bad, at the pool 84 accepted and 1 stale.
+On TESS at a high model share much of the GPU time goes to the attempts themselves, so the faster screen helps less there.
+The faster screen draws more power, so the gain per watt is a third to a half of the gain in rate. We did not measure a desktop
+RTX 40 / 50 with 0.6.1, and the RTX 4070 Laptop GPU's speed follows its thermal limit, so no figure is claimed for them.
+
+These are measurements, not a recommendation to change your clocks. Auto-lock and existing OC settings are unchanged.
 
 **GPU engine 0.6.0 (ffgn 1.0.9)**, measured 21.11.2026 (power = mean of the GPU's own readings under load; MA/s = evaluated
 attempts). The rate of the new paths is proportional to the share of a model's attempts with at most two live rows, so it moves
@@ -218,7 +255,7 @@ Full step-by-step guide for beginners (wallet, Windows, HiveOS, Linux, pools, so
 3. Linux:
    `./ffgn --pool neb.ariabrain.com:3370 --wallet neb1YOURADDRESS --worker rig1`
 4. HiveOS: custom miner `ffgn-hive`, Installation URL
-   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.9/ffgn-hive-1.0.9.tar.gz`, algorithm `nebhash`, wallet
+   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.10/ffgn-hive-1.0.10.tar.gz`, algorithm `nebhash`, wallet
    template `%WAL%.%WORKER_NAME%`, Pool URL `neb.ariabrain.com:3370`.
 5. Solo through your own node: `neb-node --run --dataset neb-datasets.bin --datadir data --miner-lock "$(neb-wallet --wallet wallet.txt lock)"`
    and `ffgn --node 127.0.0.1:3441` on the same computer (details in the manual).

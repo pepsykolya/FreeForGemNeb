@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.9 — manual for beginners
+# FreeForGemNeb (ffgn) 1.0.10 — manual for beginners
 
 This guide takes you from zero to a running **NEB** miner: a wallet, the miner on Windows, HiveOS or Linux, and the two ways
 to mine (through a pool, or solo through your own node). Русская версия — [MANUAL.ru.md](MANUAL.ru.md). HiveOS in detail:
@@ -475,7 +475,9 @@ a crash -> 2 steps below it, `--uv-max`. A step whose clock runs above the lock 
 checked once more, only then refused. A lock that does not hold turns off `--auto-lock` for that GPU too (saved in
 `autolock.json`; `--auto-lock-reset` tries again).
 
-**1.0.5: rigs with a weak CPU, measurement.** A check process is a whole NEB engine at full load (its own CUDA context, the
+**1.0.10: tuning while mining.** The steps are measured on the card's own mining load: the card keeps mining on the path the engine chose for the model, sends shares and counts its MA/s. A step alternates the candidate offset (5 s) with the best offset so far (3.5 s) and compares their power only under the same model and path, so a new block or a Kepler / TESS switch does not look like a saving. A step ends as soon as the difference is decided against the 0.5 W rule (at least 8 s at the candidate, at most `--uv-step-secs`, 25 s). A step is stable when the card had no Xid, its worker stayed alive and none of its results was wrong (every hit is checked on the CPU). Time without work is not counted. On the mining load the climbing step is +60 (refined by +15 steps near a failure; `--uv-coarse 30` for a finer climb), and the 60 s confirmation runs once, at the result. All GPUs are tuned at once; `--uv-parallel N` still limits the number. Measured on an RTX 3070: a fresh tuning took 120 s including one fault and an automatic restart of the miner (about 17 s per step); a start from a saved profile needs one 17-s check. The card ended at +240 with 124-126 W against 129-130 W at a fixed +210, at the same rate (about -3 %). A hard Xid at the edge costs one self-restart of the miner of about 10 s. A whole rig tunes in roughly 2-5 min, all cards in parallel (estimate). The old separate check process (the card's mining paused while it is checked, the rules below) is used only for a card that does not mine within 240 s, or for every card with `FFGN_UV_CHILD=1`. auto-uv and auto-lock lines are yellow in the log, their failures and roll-backs orange (`--no-color` turns colours off).
+
+**1.0.5-1.0.9 (and the fallback check process since 1.0.10): rigs with a weak CPU, measurement.** A check process is a whole NEB engine at full load (its own CUDA context, the
 dataset tables, the CPU reference). On a rig with many GPUs and a small CPU (12x RTX 2060 SUPER on a 2-thread Pentium with
 7.6 GB of RAM) twelve of them at once hung the whole rig in 1.0.4, and the power supply and the risers are invisible to
 software. Since 1.0.5 the tuning starts small and grows only while the rig stays healthy: 1 GPU at a time on rigs of 6+ GPUs
@@ -534,6 +536,41 @@ can still be noisy; the miner's efficiency number is an average.
 
 Million attempts per second (MA/s) and million attempts per second per watt (MA/W), the real dataset, memory at its stock
 clock, no undervolt. On the main network every block is KEP1 (slot 0 Kepler, slot 1 TESS: two datasets of different size).
+
+**GPU engine 0.6.1 (ffgn 1.0.10)**, measured 21.11.2026 (power = mean of the GPU's own readings under load; MA/s = evaluated
+attempts, G/s = screened nonces). On the table path the evaluated rate = screened nonces x the model's share of attempts with at
+most two live rows, so the screened rate and the screened nonces per watt compare the two versions even when the chain's model
+has changed between the runs.
+
+Engine benchmark, 1.0.9 engine (0.6.0) against 1.0.10 engine (0.6.1) on the same recorded live models, in one process with the
+same digest table (RTX 3070: 20-s segments; CMP 50HX: 12-s segments x 2 rounds):
+
+| Card, core lock | Model (share of attempts with <= 2 live rows) | 1.0.9 engine | 1.0.10 engine | Rate | MA/W |
+|---|---|---:|---:|---:|---:|
+| RTX 3070, 1680 MHz / +210 / 200 W | Kepler (1.12 %) | 4.97 G/s, 55.8 MA/s, 110.3 W, 0.506 MA/W | **6.41 G/s, 71.9 MA/s**, 127.5 W, **0.564 MA/W** | +28.9 % | +11.5 % |
+| RTX 3070, 1680 MHz / +210 / 200 W | Kepler (1.56 %) | 4.93 G/s, 77.1 MA/s, 112.0 W, 0.688 MA/W | **6.34 G/s, 99.1 MA/s**, 130.0 W, **0.762 MA/W** | +28.6 % | +10.8 % |
+| RTX 3070, 1680 MHz / +210 / 200 W | TESS (3.92 %) | 4.72 G/s, 185.3 MA/s, 113.0 W, 1.640 MA/W | **6.07 G/s, 238.2 MA/s**, 133.8 W, **1.781 MA/W** | +28.5 % | +8.6 % |
+| CMP 50HX (Turing), 1300 MHz | Kepler (1.12 %) | 4.64 G/s, 52.06 MA/s, 111.8 W, 0.466 MA/W | **5.60 G/s, 62.85 MA/s**, 118.0 W, **0.533 MA/W** | +20.7 % | +14 % |
+| CMP 50HX (Turing), 1300 MHz | TESS (3.92 %) | 4.38 G/s, 171.66 MA/s, 112.8 W, 1.522 MA/W | **5.03 G/s, 197.48 MA/s**, 117.9 W, **1.676 MA/W** | +15.0 % | +10.1 % |
+
+Live mining on one pool, screened nonces per second and per watt (the chain's models differ between the runs):
+
+| Where | Slot | 1.0.9 | 1.0.10 | Rate | Per watt |
+|---|---|---:|---:|---:|---:|
+| RTX 3070, 1680 MHz / +210 / 200 W | Kepler | 4.95 G/s at 111.4 W | **6.18 G/s** at 132.8 W | +25 % | +4.8 % |
+| RTX 3070, 1680 MHz / +210 / 200 W | TESS | 4.55 G/s at 117.5 W | **5.81 G/s** at 139.6 W | +27 % | +7.6 % |
+| 5x CMP 50HX (Turing), 1300 MHz, rig total | Kepler | 23.43 G/s at 567 W | **26.51 G/s** at 605 W | +13.1 % | +6.1 % |
+| 5x CMP 50HX (Turing), 1300 MHz, rig total | TESS | 21.09 G/s at 596 W | **21.73 G/s** at 604 W | +3.0 % | +1.6 % |
+
+RTX 3070, 1.0.10, the first 16 min: Kepler (model share 1.93 %) 186.6 MA/s at 132.8 W (1.405 MA/W), TESS (8.62 %) 428.9 MA/s at
+139.6 W (3.07 MA/W); 63 shares found, 62 accepted, 1 stale ("job not found" right after a job change), 0 bad. Five CMP 50HX,
+1.0.10, 20 min: Kepler (2.77 %) 739.4 MA/s at 605 W for the rig (1.222 MA/W), 146.2-149.5 MA/s per card; TESS (9.13 %)
+1981.5 MA/s at 604 W (3.276 MA/W), 389.5-404.1 MA/s per card; 117 shares found, 0 bad, at the pool 84 accepted and 1 stale.
+On TESS at a high model share much of the GPU time goes to the attempts themselves, so the faster screen helps less there.
+The faster screen draws more power, so the gain per watt is a third to a half of the gain in rate. We did not measure a desktop
+RTX 40 / 50 with 0.6.1, and the RTX 4070 Laptop GPU's speed follows its thermal limit, so no figure is claimed for them.
+
+These are measurements, not a recommendation to change your clocks. Auto-lock and existing OC settings are unchanged.
 
 **GPU engine 0.6.0 (ffgn 1.0.9)**, measured 21.11.2026 (power = mean of the GPU's own readings under load; MA/s = evaluated
 attempts). The rate of the new paths is proportional to the share of a model's attempts with at most two live rows, so it moves
@@ -801,6 +838,7 @@ The fee address (public, so you can check it on the pools):
 | HiveOS does not start the miner | The Installation URL of the right release; algorithm `nebhash`; wallet template `%WAL%.%WORKER_NAME%`; read `miner log`. |
 | Windows: clocks / undervolt not applied | Start the `.bat` with Run as administrator. |
 | Antivirus warning | Mining software is often flagged. Compare the SHA-256 with `SHA256SUMS`, then add an exclusion if you decide to trust it. |
+| All GPUs of a rig restart together | All GPUs run in one miner process, so a fault on one GPU (usually an overclock or undervolt too far for that card) restarts the miner on every GPU; it recovers by itself in about a minute. The log names the GPU with the driver fault: lower that card's offset or use `--auto-uv`. |
 
 Questions and bug reports: https://github.com/pepsykolya/FreeForGemNeb/issues, Telegram channel
 [@freeforgem](https://t.me/freeforgem) and chat [@freeforgem_chat](https://t.me/freeforgem_chat). Please include the version
