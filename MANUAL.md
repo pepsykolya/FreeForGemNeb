@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.11 — manual for beginners
+# FreeForGemNeb (ffgn) 1.0.12 — manual for beginners
 
 This guide takes you from zero to a running **NEB** miner: a wallet, the miner on Windows, HiveOS or Linux, and the two ways
 to mine (through a pool, or solo through your own node). Русская версия — [MANUAL.ru.md](MANUAL.ru.md). HiveOS in detail:
@@ -238,6 +238,8 @@ column carries the efficiency (`1.0.2 0.0240 MA/W`) and `need update!!` when a n
   stops. Do not set a core offset in the OC profile when you use `--auto-uv` or `--auto-lock`.
 - HiveOS caches archives by file name: after an update use the new Installation URL.
 - Tuning results are kept in `/hive-config/ffgn` (survive reboots and updates).
+- Recommended: the HiveOS Watchdog (minimal hashrate about 50 % of normal, restart the miner after 10-15 min, reboot after
+  20-30 min) and `--reboot-on-lost-gpu 10` in Extra config: a GPU that fell off the bus gets the rig rebooted (section 15).
 
 ## 9. Pools: Aria and Suprnova
 
@@ -386,7 +388,11 @@ GPU in `--devices` order (`-` = leave that GPU alone).
 | `--keep-hive-mem` | keep a HiveOS OC profile memory lock below the card's maximum (by default ffgn replaces it with the maximum while mining, see section 13) |
 | `--moffset N` | memory clock offset in MHz, may be negative (driver 555 or newer) |
 | `--table-mclock N` | NEB: lock the memory to N MHz (e.g. 810) only while a GPU mines on the pure digest-table path; the full memory clock comes back by itself for every table build, the L=3 path and every other path (same list syntax as `--lock-mclock`; root / Administrator) |
+| `--tbig MODE` | NEB: partial L=3 digest table of the TESS slot (1.0.12): `auto` (default) builds the triples while mining and sizes them per model from the measured build speed and model lifetime (none when they would not pay back); `on` = all the free VRAM at each model start; `off` |
+| `--tbig-gb G` | NEB: at most G GB for the TESS triples (default: the free VRAM minus a reserve for the Kepler table) |
+| `--power-limit N` (alias `--pl N`) | set the GPU power limit to N W (like `nvidia-smi -pl`; root / Administrator). One value for all GPUs, or one per GPU in `--devices` order: `--pl 140,115,140` (`-` = leave that GPU's limit as it is, e.g. the HiveOS one; a list needs one value per GPU, like `--uv-max`). The value is clamped to the card's range (the log says so). The limit from before is put back on exit, on Ctrl-C and at the next start after a crash (one file per GPU, `power-limit-restore-<bus>.json` in the state folder; on HiveOS the OC profile's power limit); an OC apply that changes it while mining is undone (one log line; at most 4 times an hour per GPU). auto-uv measures with the limit in force; when the limit holds the clocks down under load (power cap) the log says so once. Stats line: `GPU0 47.1 (139 W, PL 140 W capped, 0.3388 MA/W)`; API `/gpus`: `power_limit_w`, `power_limit_ours`, `power_limit_set_w`, `power_limit_binds` |
 | `--single-process` | run every GPU's engine in the miner process (before 1.0.11); default: one engine process per GPU, so a fault on one GPU restarts only that GPU |
+| `--reboot-on-lost-gpu MIN` | opt-in: reboot the rig when a GPU is lost (Xid 79 / `DEAD` / gone from NVML) for MIN minutes (recommended on rigs: `10`): HiveOS `sreboot`, else `systemctl reboot`; Windows `shutdown /r /t 60`. Never in the first 10 min of the miner, at most once per 60 min; off with `--single-process` or `FFGN_NO_REBOOT=1`; root / Administrator. See section 15 |
 | `--temp-limit C[,C]` | keep the GPU at or below C degrees (40..100); a duty-cycle controller, for laptops |
 | `--temp-stop C2[,C2]` | hard stop at C2 until the GPU cools to the limit minus 6 (default limit + 10) |
 
@@ -538,6 +544,32 @@ can still be noisy; the miner's efficiency number is an average.
 
 Million attempts per second (MA/s) and million attempts per second per watt (MA/W), the real dataset, memory at its stock
 clock, no undervolt. On the main network every block is KEP1 (slot 0 Kepler, slot 1 TESS: two datasets of different size).
+
+**GPU engine 0.8.1 (ffgn 1.0.12)**, measured 21.11.2026, values per card (power = mean of the card's own readings under
+load; MA/s = evaluated attempts).
+
+Partial L=3 table for TESS (engine benchmark: one resident table, the same TESS models of the chain, alternating 8-s segments
+with the triples ignored and used):
+
+| Card, clocks (per card) | TESS, pairs only (as 1.0.11) | TESS, 1.0.12 with the triples | Rate | MA/W | Triples, full build |
+|---|---:|---:|---:|---:|---:|
+| RTX 4070 Ti 12 GB, 2250 MHz, PL 190 W | 415.1 MA/s, 178 W | **488.9 MA/s**, 179 W | +17.5 to +17.8 % | +17.2 to +18.0 % | 316 M in 2.69 s |
+| RTX 3080 Ti 12 GB, default clocks | 404.0 MA/s | **472.3 MA/s** | +16.9 to +17.0 % | | 301 M in 2.35 s |
+| RTX 3070 8 GB, 1680 MHz / +210 / 200 W | 238.9 MA/s, 133 W | **261.7 MA/s**, 133 W | +9.4 to +9.6 % | +9.4 to +9.8 % | 189 M in 2.72 s |
+| RTX 4070 Laptop 8 GB | 198-218 MA/s, 75-85 W | **214-232 MA/s** | +6.1 to +8.3 % | +8.3 to +9.3 % | 169 M in 2.2-2.3 s |
+
+These are steady-state numbers with the triples built. Every new TESS model needs its own triples. The miner builds them while
+it mines and sizes them per model from the measured build speed and the measured TESS mining time per model. At 41 s of TESS
+mining per model this is worth about +9 to +10 % per model on the 12 GB cards and about +2 % on the RTX 3070. When the models
+are short-lived it builds none: live, an RTX 3070 measured 13 s per model and kept the pair table only, the 1.0.11 path.
+The triples are exact: byte-compared with the full fold on every card, slice by slice.
+
+Live, RTX 3070 (1680 MHz / +210 / 200 W, `--table-mclock 810`), FFGN 1.0.12 against 1.0.11 on a second RTX 3070 of the same
+machine in the same minutes: Kepler rate x0.999. Power per watt was 1.7-2.4 % lower than the spread between the two cards on
+1.0.11 alone, in one 10-minute window. 0 bad results. `--power-limit 150` on that card: 150 W while mining, the previous 200 W
+again after the miner's exit.
+
+These are measurements, not a recommendation to change your clocks. Auto-lock and existing OC settings are unchanged.
 
 **GPU engine 0.7.0 (ffgn 1.0.11)**, measured 21.11.2026 (power = mean of the GPU's own readings under load; MA/s = evaluated
 attempts). P = the model's share of attempts with at most two live rows.
@@ -794,6 +826,22 @@ whenever these programs run. Other mining programs are not counted as use.
   nothing left to lower is left out for 1 hour, the others keep mining. If every GPU stops, the miner restarts itself.
 - **Your settings come back** after every kind of stop: Ctrl+C, `miner stop`, closing the console window, a crash (marker
   files restore the clocks at the next start).
+- **Lost GPU** (1.0.12). A GPU that fell off the PCIe bus (Xid 79), whose engine cannot reopen the device after the retries
+  (`DEAD` on the stats line) or that NVML no longer sees is LOST: it shows `0` and `LOST` / `DEAD` on the stats line, `lost: true`
+  in the API `/gpus` (its average is 0 as well), and `GPU LOST GPU1` next to the version in HiveOS, so the total is the true one.
+  The NVIDIA driver gets such a card back only after a reboot. `--reboot-on-lost-gpu MIN` (off by default; recommended on rigs:
+  `10`) reboots the rig when a GPU stays lost for MIN minutes: HiveOS `sreboot` (`/hive/sbin/sreboot`), else `systemctl reboot`;
+  Windows `shutdown /r /t 60 /c "FFGN: GPU lost"` (`shutdown /a` cancels it within the 60 s). Never in the first 10 minutes of
+  the miner and at most once per 60 minutes (the time is kept in `reboot-on-lost-gpu.json` in the state folder, across reboots:
+  a card that is still lost after the reboot does not make the rig reboot in a loop); a `WARNING: REBOOTING THE RIG: GPU1 (bus 02)
+  lost for 10.0 min (...); running ...` line comes first, also in the API warnings. With `--single-process` or the environment
+  variable `FFGN_NO_REBOOT=1` it never reboots, it only logs what it would do. Needs root / Administrator (HiveOS: root).
+- **Never standing still** (1.0.12). When every GPU is down or not mining for 5 minutes although there is work (the driver is
+  gone, every engine fails), the miner exits with code **3**: HiveOS (its miner restart and Watchdog), `start.ps1` and systemd
+  start it again. A pool or node that is down, a pause (idle mode, an auto-uv check, a temperature stop) does not count.
+- **HiveOS Watchdog (recommended).** Rig settings, *Watchdog*: enable it, *Minimal hashrate* about 50 % of the rig's normal
+  total for `nebhash` (e.g. 120 MA/s normal -> 60000 kH/s), *Restart miner after* 10-15 minutes, *Reboot after* 20-30 minutes;
+  plus `--reboot-on-lost-gpu 10` in Extra config. A lost GPU counts 0, so the rule sees the real hashrate.
 - Windows `start.ps1` restarts a miner that exited after 15 seconds; HiveOS and systemd restart it too.
 
 ## 16. Reading the log, the API, the balance
@@ -807,7 +855,7 @@ Every 60 seconds one line (pool mode):
 1.0.4: after `total` come the average of the last 5 minutes (`| avg 5 min 23.9 MA/s (11.9, 12.0)`, total and per GPU; HiveOS shows
 this average) and the dataset of the current block (`| slot 1 TESS`: on the main network slot 0 is Kepler, slot 1 TESS; the
 rate differs by slot, an RTX 3070 @1650 ~16.9 vs ~18.6 MA/s, so a slot change is not a regression). API `/summary`:
-`attempts_per_s_avg`, `slot`, `dataset`; `/gpus`: `attempts_per_s_avg`, `memory_locked_by_oc_mhz`. Solo: `... | shares 3 | blocks sub 0 acc 0 rej 0 | ...`. **MA/s** = million attempts per second; `found` = what the GPUs found (each
+`attempts_per_s_avg`, `slot`, `dataset`; `/gpus`: `attempts_per_s_avg`, `memory_locked_by_oc_mhz`, `power_limit_w` (the limit the card is held to; with `--power-limit` also `power_limit_ours`, `power_limit_set_w`, `power_limit_binds`). Solo: `... | shares 3 | blocks sub 0 acc 0 rej 0 | ...`. **MA/s** = million attempts per second; `found` = what the GPUs found (each
 one re-checked on the CPU), `bad` must stay 0. Lines you will meet:
 
 | Line | Meaning |

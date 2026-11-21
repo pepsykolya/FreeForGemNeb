@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.11
+# FreeForGemNeb (ffgn) 1.0.12
 
 Native GPU miner for **NEB** (Neural Engine Byte), a proof-of-work coin whose mining attempt is one integer training step of a
 small neural network (on the main network, the Kepler transit-signal network KEP1 in both dataset slots).
@@ -11,6 +11,8 @@ NVIDIA GPUs; HiveOS, Windows and Linux packages. Dev fee **1%**. Русская 
   GPU by measurement, clock locks, temperature limit for laptops, idle mode on Windows.
 - Pool failover with the return to the primary pool, watchdogs for pools without credited shares, API with Prometheus
   metrics, your GPU settings put back after every kind of stop, Windows autostart, HiveOS stats, a notice when a new version is out.
+
+**What changed in 1.0.12** (recommended for everyone). GPU engine 0.8.1. **Partial L=3 table for TESS, automatic:** the digest table of the TESS slot can now also hold attempts with three live rows, as many as fit in the free VRAM. The miner builds them in slices while the pair table already mines and sizes them per model from two measured numbers: the card's build speed and how long TESS models last. When the models change too quickly for the build to pay back, it builds none. With the triples built, the TESS rate rises by +17 to +18 % on an RTX 4070 Ti or RTX 3080 Ti (12 GB) and by +9.5 % on an RTX 3070 (8 GB), at the same power. `--tbig off|auto|on`, `--tbig-gb G`. **New option `--power-limit N` (`--pl N`)**: one value or one per GPU, put back on exit and set again after an OC apply. **New option `--reboot-on-lost-gpu MIN`** (off by default): reboots the rig when a GPU stays lost (fallen off the bus) for MIN minutes; and when every GPU is down for 5 min the miner exits with code 3, so the HiveOS watchdog can act; a lost GPU reports 0. **auto-uv:** no 24 h pause without a real verdict (in 1.0.11 one card's fault could pause the others at +0); after a restart a card with recent crashes resumes below its saved offset and climbs again; after an Xid 79 the whole rig tunes cautiously for 6 h; RTX 20 / GTX 16 climb at most to +240 by default (`--uv-max` overrides). **The digest table no longer stays off after one slow measurement** (for example during a driver recovery on another GPU). The path line says why a GPU mines without the table. **Fixed (Windows):** when an undervolt step went too far and the driver had to recover the card, the miner itself could close a moment later. Now the miner pauses its NVML calls for that GPU until its new engine process mines again, restarts only that GPU and steps the offset down as usual. Results, models, tickets and the dataset are unchanged bit for bit; the CPU reference still re-checks every share.
 
 **What changed in 1.0.11** (recommended for everyone; RTX 20 / GTX 16 / CMP Turing and RTX 30 / 40). GPU engine 0.7.0. **Automatic L=3 on low-P models:** when the chain's Kepler model has few attempts with at most two live rows (below 1.3 %), the engine now also evaluates cheap attempts with three live rows from the digest table (exact, by inclusion-exclusion) and decides by a short trial per model. On such a model: RTX 3070 +28 % rate and +18 % per watt (60.0 against 47.0 MA/s), CMP 50HX (Turing) +15 % rate and +13 to +15 % per watt. Models above 1.3 % are unchanged. **Faster table build:** the pair section of the digest table is built 3.1 to 4.2 times faster (byte-identical), so each new Kepler model costs about 0.7 s less mining (RTX 3070: 1.0-1.2 s -> 0.31-0.34 s; CMP 50HX: 0.9-1.1 s -> 0.29-0.32 s). **Faster screen on RTX 30 / 40** (sm_86 / sm_89): +1.0 % (Kepler) and +2.25 % (TESS) rate on an RTX 3070. **New option `--table-mclock N`** (e.g. 810): the memory is locked to N MHz only while a GPU mines on the pure digest-table path, which barely uses the memory; the miner switches the memory back to the full clock by itself for every table build, the L=3 path and every other path. It only helps the pure table path: there an RTX 3070 drew about 10 W less at the same rate. Needs root / Administrator; off by default. **One engine process per GPU:** a fault on one GPU restarts only that GPU (about 5-10 s), the other GPUs keep mining; `--single-process` restores the old behaviour; about 60 MB extra RAM per GPU. **Fixed:** in 1.0.10 a start (or restart) on a low-P model could switch the digest table off after 3 s and mine on a slower path until the next model (RTX 3070: 40 MA/s at 173-181 W instead of about 47 MA/s at 127 W). auto-uv now compares the power of a step only on the same model and path, including its memory clock. Engine hardening for big rigs (an ordering fix of two counters, a check of the table's row map before upload). Results, models, tickets and the dataset are unchanged bit for bit; the CPU reference still re-checks every share.
 
@@ -41,14 +43,14 @@ about any income.
 
 ## Download
 
-Release page: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.11
+Release page: https://github.com/pepsykolya/FreeForGemNeb/releases/tag/v1.0.12
 
 | package | file |
 |---|---|
-| HiveOS (custom miner `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.11/ffgn-hive-1.0.11.tar.gz |
-| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.11/ffgn-1.0.11-linux-x86_64.tar.gz |
-| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.11/ffgn-1.0.11-windows-x64.zip |
-| checksums | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.11/SHA256SUMS |
+| HiveOS (custom miner `ffgn-hive`) | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.12/ffgn-hive-1.0.12.tar.gz |
+| Linux x86_64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.12/ffgn-1.0.12-linux-x86_64.tar.gz |
+| Windows x64 | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.12/ffgn-1.0.12-windows-x64.zip |
+| checksums | https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.12/SHA256SUMS |
 
 The miner binary is `ffgn` (`ffgn.exe` on Windows). The dataset file of the NEB main network (`neb-datasets.bin`, about 16 MB) is
 inside every package.
@@ -57,6 +59,32 @@ inside every package.
 
 Million attempts per second (MA/s) and million attempts per second per watt (MA/W), the real dataset, memory at its stock
 clock, no undervolt. On the main network every block is KEP1 (slot 0 Kepler, slot 1 TESS: two datasets of different size).
+
+**GPU engine 0.8.1 (ffgn 1.0.12)**, measured 21.11.2026, values per card (power = mean of the card's own readings under
+load; MA/s = evaluated attempts).
+
+Partial L=3 table for TESS (engine benchmark: one resident table, the same TESS models of the chain, alternating 8-s segments
+with the triples ignored and used):
+
+| Card, clocks (per card) | TESS, pairs only (as 1.0.11) | TESS, 1.0.12 with the triples | Rate | MA/W | Triples, full build |
+|---|---:|---:|---:|---:|---:|
+| RTX 4070 Ti 12 GB, 2250 MHz, PL 190 W | 415.1 MA/s, 178 W | **488.9 MA/s**, 179 W | +17.5 to +17.8 % | +17.2 to +18.0 % | 316 M in 2.69 s |
+| RTX 3080 Ti 12 GB, default clocks | 404.0 MA/s | **472.3 MA/s** | +16.9 to +17.0 % | | 301 M in 2.35 s |
+| RTX 3070 8 GB, 1680 MHz / +210 / 200 W | 238.9 MA/s, 133 W | **261.7 MA/s**, 133 W | +9.4 to +9.6 % | +9.4 to +9.8 % | 189 M in 2.72 s |
+| RTX 4070 Laptop 8 GB | 198-218 MA/s, 75-85 W | **214-232 MA/s** | +6.1 to +8.3 % | +8.3 to +9.3 % | 169 M in 2.2-2.3 s |
+
+These are steady-state numbers with the triples built. Every new TESS model needs its own triples. The miner builds them while
+it mines and sizes them per model from the measured build speed and the measured TESS mining time per model. At 41 s of TESS
+mining per model this is worth about +9 to +10 % per model on the 12 GB cards and about +2 % on the RTX 3070. When the models
+are short-lived it builds none: live, an RTX 3070 measured 13 s per model and kept the pair table only, the 1.0.11 path.
+The triples are exact: byte-compared with the full fold on every card, slice by slice.
+
+Live, RTX 3070 (1680 MHz / +210 / 200 W, `--table-mclock 810`), FFGN 1.0.12 against 1.0.11 on a second RTX 3070 of the same
+machine in the same minutes: Kepler rate x0.999. Power per watt was 1.7-2.4 % lower than the spread between the two cards on
+1.0.11 alone, in one 10-minute window. 0 bad results. `--power-limit 150` on that card: 150 W while mining, the previous 200 W
+again after the miner's exit.
+
+These are measurements, not a recommendation to change your clocks. Auto-lock and existing OC settings are unchanged.
 
 **GPU engine 0.7.0 (ffgn 1.0.11)**, measured 21.11.2026 (power = mean of the GPU's own readings under load; MA/s = evaluated
 attempts). P = the model's share of attempts with at most two live rows.
@@ -285,7 +313,7 @@ Full step-by-step guide for beginners (wallet, Windows, HiveOS, Linux, pools, so
 3. Linux:
    `./ffgn --pool neb.ariabrain.com:3370 --wallet neb1YOURADDRESS --worker rig1`
 4. HiveOS: custom miner `ffgn-hive`, Installation URL
-   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.11/ffgn-hive-1.0.11.tar.gz`, algorithm `nebhash`, wallet
+   `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.12/ffgn-hive-1.0.12.tar.gz`, algorithm `nebhash`, wallet
    template `%WAL%.%WORKER_NAME%`, Pool URL `neb.ariabrain.com:3370`.
 5. Solo through your own node: `neb-node --run --dataset neb-datasets.bin --datadir data --miner-lock "$(neb-wallet --wallet wallet.txt lock)"`
    and `ffgn --node 127.0.0.1:3441` on the same computer (details in the manual).
