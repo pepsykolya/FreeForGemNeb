@@ -1,4 +1,4 @@
-# FreeForGemNeb (ffgn) 1.0.12 on HiveOS
+# FreeForGemNeb (ffgn) 1.0.11 on HiveOS
 
 [English](#english) · [Русский](#русский)
 
@@ -32,7 +32,7 @@ the NEB **main** network. Pools are described in MANUAL section 9, the node and 
 2. **Flight Sheets**, **Import from Clipboard**, paste:
 
 ```json
-{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.12/ffgn-hive-1.0.12.tar.gz","user_config":""},"pool_geo":[]}]}
+{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.11/ffgn-hive-1.0.11.tar.gz","user_config":""},"pool_geo":[]}]}
 ```
 
 3. Pick your `NEB` wallet in the red-marked field (the import carries no wallet), **Create flight sheet**, apply it to the rig.
@@ -46,12 +46,12 @@ Coin `NEB`, Wallet: yours, Pool: *Configure in miner*, Miner: **Custom**, *Setup
 | Field | Value |
 |---|---|
 | Miner name | `ffgn-hive` (filled in automatically from the URL) |
-| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.12/ffgn-hive-1.0.12.tar.gz` |
+| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.11/ffgn-hive-1.0.11.tar.gz` |
 | Hash algorithm | `nebhash` |
 | Wallet and worker template | `%WAL%.%WORKER_NAME%` |
 | Pool URL | see the table above |
 | Pass | `x` (or empty) |
-| Extra config arguments | optional: `--auto-lock`, `--auto-uv`, `--lock-cclock 1500`, `--pl 140`, `--devices 0,2`, ... |
+| Extra config arguments | optional: `--auto-lock`, `--auto-uv`, `--lock-cclock 1500`, `--devices 0,2`, ... |
 
 **Rigs with many GPUs on a weak CPU** (2-4 CPU threads, a few GB of RAM, e.g. 8-12 cards on a Pentium / Celeron): ffgn 1.0.5
 tunes `--auto-uv` one GPU at a time on rigs of 6+ GPUs and grows to 2 and 4 only while the rig stays healthy (the others
@@ -77,36 +77,12 @@ you apply an OC profile in the web UI while the miner runs, the miner sets its o
 stop` puts the profile's values back. Undervolt and lock results are kept in `/hive-config/ffgn` (they survive reboots and
 updates); `--uv-reset-all` forgets them.
 
-**Power limit in Extra config.** `--power-limit N` (or `--pl N`) sets the power limit to N W while the miner runs: one value for
-all GPUs, or one per GPU in `--devices` order (`--pl 140,115,140`; `-` = keep that GPU's limit from the OC profile). It is
-clamped to the card's range, and the OC profile's power limit is put back when the miner stops (also after a crash, at the next
-start). If HiveOS applies the OC profile while the miner runs, the miner sets its limit again and says so in the log. The stats
-line shows `PL 140 W` per GPU (`capped` while the limit holds the clocks down); auto-uv tunes with the limit in force.
-
 **Updating.** HiveOS caches archives by file name: after a new release use the new Installation URL. The miner only reports a
 newer release (`need update!!`); `--no-update-check` hides it.
 
 **Solo on a rig.** The node's work port is local only. Either run the node on the rig (`node://127.0.0.1:3441`), or run an
 **ffgn-gate** beside a node somewhere else and give the rigs `GATE-HOST:3442` with the token in Pass (MANUAL section 11). The
 reward of a block goes to the node's `--miner-lock`.
-
-### Watchdog and a lost GPU (recommended)
-
-A GPU can fall off the PCIe bus (Xid 79: a riser, its power, the card); the NVIDIA driver gets it back only after a reboot of
-the rig. Two settings make a rig recover by itself instead of being found the next morning not mining:
-
-1. **HiveOS Watchdog** (rig settings, *Watchdog*): enable it; *Minimal hashrate* about **50 %** of the rig's normal total for
-   `nebhash` (the dashboard shows kH/s = MA/s x 1000: 120 MA/s normal -> 60000); *Restart miner after* **10-15 min**; *Reboot
-   after* **20-30 min**.
-2. **`--reboot-on-lost-gpu 10`** in *Extra config arguments*: a GPU lost for 10 minutes (Xid 79, its engine cannot reopen the
-   device = `DEAD`, or NVML no longer sees it) makes the miner reboot the rig with HiveOS `sreboot`. Never in the first 10 min
-   of the miner, at most once per 60 min (`/hive-config/ffgn/reboot-on-lost-gpu.json`), so a card still lost after the reboot
-   does not reboot the rig in a loop; the Watchdog and the dashboard still show it. A `WARNING: REBOOTING THE RIG ...` line
-   comes first in `miner log`. `FFGN_NO_REBOOT=1` (or `--single-process`) turns it off.
-
-Always, without options: a lost GPU shows **0** on the dashboard (and `GPU LOST GPU1` next to the version), so the total is
-the true one and the minimal hashrate rule fires; when every GPU is down or not mining for 5 min although there is work, the
-miner exits with code 3 and HiveOS starts it again.
 
 ### Troubleshooting
 
@@ -116,7 +92,6 @@ miner exits with code 3 and HiveOS starts it again.
 | "Wallet template is empty" / "Pool URL is empty" in the log | Fill the flight sheet fields. |
 | No accepted shares | Pool address, `neb1...` address, the pool works on the main network; a wrong rig clock. |
 | Speed lower than expected | The OC profile or the power limit; temperature; compare with MANUAL section 13. |
-| `GPU LOST` / `REBOOT NEEDED` next to the version | A GPU fell off the bus (Xid 79) or cannot be opened: reboot the rig, then check that GPU's riser and power. `--reboot-on-lost-gpu 10` does the reboot by itself (see above). |
 
 
 ### Memory clock (important)
@@ -124,7 +99,7 @@ miner exits with code 3 and HiveOS starts it again.
 NEB is memory bound. An OC profile that locks the memory low (Pearl profiles: 810 MHz) makes NEB about 10x slower. ffgn replaces
 such a lock with the card's maximum while it mines and puts the profile's value back when it stops (log: `WARNING the HiveOS OC
 profile locks the memory to 810 MHz ...`). `--keep-hive-mem` in Extra config keeps the profile's value. Simpler: give the NEB
-flight sheet an OC profile without a memory lock. Since 1.0.12 the TESS triples (`--tbig auto`, the default) need nothing in Extra config. Optional since 1.0.11: `--table-mclock 810` in Extra config locks the memory low only while the pure digest-table path runs (the full clock comes back by itself for every build and every other path).
+flight sheet an OC profile without a memory lock. Optional since 1.0.11: `--table-mclock 810` in Extra config locks the memory low only while the pure digest-table path runs (the full clock comes back by itself for every build and every other path).
 
 ## Русский
 
@@ -156,7 +131,7 @@ TLS: `stratum+ssl://HOST:PORT`, где пул его предлагает. Пр�
 2. **Flight Sheets**, **Import from Clipboard**, вставьте:
 
 ```json
-{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.12/ffgn-hive-1.0.12.tar.gz","user_config":""},"pool_geo":[]}]}
+{"name":"ffgn NEB Aria","isFavorite":false,"items":[{"coin":"NEB","pool_ssl":false,"pool_urls":["neb.ariabrain.com:3370"],"dpool_ssl":false,"miner":"custom","miner_alt":"ffgn-hive","miner_config":{"url":"neb.ariabrain.com:3370 stratum+tcp://neb.suprnova.cc:7804","algo":"nebhash","pass":"x","miner":"ffgn-hive","template":"%WAL%.%WORKER_NAME%","install_url":"https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.11/ffgn-hive-1.0.11.tar.gz","user_config":""},"pool_geo":[]}]}
 ```
 
 3. Выберите кошелёк `NEB` в поле, отмеченном красным (импорт кошелёк не переносит), **Create flight sheet**, примените к ригу.
@@ -170,12 +145,12 @@ Coin `NEB`, Wallet: ваш, Pool: *Configure in miner*, Miner: **Custom**, *Setu
 | Поле | Значение |
 |---|---|
 | Miner name | `ffgn-hive` (заполняется автоматически из URL) |
-| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.12/ffgn-hive-1.0.12.tar.gz` |
+| Installation URL | `https://github.com/pepsykolya/FreeForGemNeb/releases/download/v1.0.11/ffgn-hive-1.0.11.tar.gz` |
 | Hash algorithm | `nebhash` |
 | Wallet and worker template | `%WAL%.%WORKER_NAME%` |
 | Pool URL | см. таблицу выше |
 | Pass | `x` (или пусто) |
-| Extra config arguments | по желанию: `--auto-lock`, `--auto-uv`, `--lock-cclock 1500`, `--pl 140`, `--devices 0,2`, ... |
+| Extra config arguments | по желанию: `--auto-lock`, `--auto-uv`, `--lock-cclock 1500`, `--devices 0,2`, ... |
 
 **Риги с множеством карт на слабом CPU** (2–4 потока CPU, несколько ГБ RAM, например 8–12 карт на Pentium / Celeron): ffgn 1.0.5
 подбирает `--auto-uv` по одной карте на ригах от 6 карт и увеличивает до 2 и 4, только пока риг здоров (остальные майнят);
@@ -201,37 +176,12 @@ Coin `NEB`, Wallet: ваш, Pool: *Configure in miner*, Miner: **Custom**, *Setu
 значения профиля. Результаты подбора андервольта и лока лежат в `/hive-config/ffgn` (переживают перезагрузки и обновления);
 `--uv-reset-all` их забывает.
 
-**Лимит мощности в Extra config.** `--power-limit N` (или `--pl N`) ставит лимит мощности N Вт на время работы майнера: одно
-значение на все карты или по одному на карту в порядке `--devices` (`--pl 140,115,140`; `-` — оставить этой карте лимит из
-OC-профиля). Значение подрезается до диапазона карты, а при остановке майнера возвращается лимит из OC-профиля (и после сбоя —
-при следующем запуске). Если HiveOS применит OC-профиль во время майнинга, майнер снова выставит свой лимит и напишет об этом в
-лог. В строке статистики у каждой карты видно `PL 140 W` (`capped` — пока лимит сдерживает частоты); auto-uv подбирает с
-действующим лимитом.
-
 **Обновление.** HiveOS кэширует архивы по имени файла: после нового релиза берите новый Installation URL. Майнер только сообщает
 о новом релизе (`need update!!`); `--no-update-check` это скрывает.
 
 **Соло на риге.** Рабочий порт ноды только локальный. Либо запустите ноду на риге (`node://127.0.0.1:3441`), либо поставьте
 **ffgn-gate** рядом с нодой в другом месте и дайте ригам `GATE-HOST:3442` с токеном в Pass (MANUAL.ru.md, раздел 11). Награда за
 блок идёт на `--miner-lock` ноды.
-
-### Watchdog и потерянная карта (рекомендуем)
-
-Карта может отвалиться от шины PCIe (Xid 79: райзер, его питание, сама карта); драйвер NVIDIA возвращает её только после
-перезагрузки рига. Две настройки дают ригу восстановиться самому, а не стоять до утра без майнинга:
-
-1. **Watchdog HiveOS** (настройки рига, *Watchdog*): включить; *Minimal hashrate* — около **50 %** обычной общей скорости рига для
-   `nebhash` (панель показывает kH/s = MA/s x 1000: обычно 120 MA/s -> 60000); *Restart miner after* — **10–15 мин**; *Reboot
-   after* — **20–30 мин**.
-2. **`--reboot-on-lost-gpu 10`** в *Extra config arguments*: карта, потерянная 10 минут (Xid 79, её движок не может заново открыть
-   устройство = `DEAD`, или её больше не видит NVML), — майнер перезагружает риг командой HiveOS `sreboot`. Никогда в первые 10 мин
-   работы майнера, не чаще раза в 60 мин (`/hive-config/ffgn/reboot-on-lost-gpu.json`), так что карта, потерянная и после
-   перезагрузки, не уводит риг в цикл перезагрузок; Watchdog и панель всё равно её покажут. Сначала в `miner log` пишется строка
-   `WARNING: REBOOTING THE RIG ...`. `FFGN_NO_REBOOT=1` (или `--single-process`) выключает перезагрузку.
-
-Всегда, без опций: потерянная карта показывает на панели **0** (и `GPU LOST GPU1` рядом с версией), общая скорость честная, и
-правило minimal hashrate срабатывает; если все карты не работают или не майнят 5 мин при наличии задания, майнер выходит с кодом 3,
-и HiveOS запускает его снова.
 
 ### Проблемы и решения
 
@@ -241,11 +191,10 @@ OC-профиля). Значение подрезается до диапазо�
 | В логе «Wallet template is empty» / «Pool URL is empty» | Заполните поля полётного листа. |
 | Нет принятых шар | Адрес пула, адрес `neb1...`, пул работает в основной сети; неверные часы рига. |
 | Скорость ниже ожидаемой | OC-профиль или лимит мощности; температура; сравните с MANUAL.ru.md, раздел 13. |
-| `GPU LOST` / `REBOOT NEEDED` рядом с версией | Карта отвалилась от шины (Xid 79) или не открывается: перезагрузите риг, затем проверьте райзер и питание этой карты. `--reboot-on-lost-gpu 10` перезагрузит сам (см. выше). |
 
 ### Частота памяти (важно)
 
 NEB упирается в память. OC-профиль с низким локом памяти (профили для Pearl: 810 МГц) замедляет NEB примерно в 10 раз. ffgn на
 время майнинга заменяет такой лок на максимум карты и возвращает значение профиля при остановке (в логе: `WARNING the HiveOS OC
 profile locks the memory to 810 MHz ...`). `--keep-hive-mem` в Extra config оставляет значение профиля. Проще: дайте полётному
-листу NEB OC-профиль без лока памяти. С 1.0.12 тройкам TESS (`--tbig auto`, по умолчанию) ничего в Extra config не нужно. С 1.0.11 по желанию: `--table-mclock 810` в Extra config фиксирует память низко только пока идёт чистый путь таблицы дайджестов (на каждую сборку и любой другой путь полная частота возвращается сама).
+листу NEB OC-профиль без лока памяти. С 1.0.11 по желанию: `--table-mclock 810` в Extra config фиксирует память низко только пока идёт чистый путь таблицы дайджестов (на каждую сборку и любой другой путь полная частота возвращается сама).
